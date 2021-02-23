@@ -239,7 +239,7 @@ GCA_001008035.1_Atex_B6155_v1,51582,Atkinsonella texensis,B6155,Ascomycota,Peziz
 GCA_010015705.1_Aulhe2,1176130,Aulographum hederae,CBS 113979,Ascomycota,Pezizomycotina,Dothideomycetes,Pleosporomycetidae,Aulographales,Aulographaceae,Aulographum,Aulographum hederae
 GCA_016807825.1_ASM1680782v1,46634,Aureobasidium melanogenum,ATCC 62921,Ascomycota,Pezizomycotina,Dothideomycetes,Dothideomycetidae,Dothideales,Saccotheciaceae,Aureobasidium,Aureobasidium melanogenum
 GCF_000721765.1_Aureobasidium_pullulans_var._namibiae_CBS_147.97_v1.0,559561,Aureobasidium namibiae,CBS 147.97,Ascomycota,Pezizomycotina,Dothideomycetes,Dothideomycetidae,Dothideales,Saccotheciaceae,Aureobasidium,Aureobasidium namibiae
-GCF_000721785.1_"Aureobasidium_pullulans_var._pullulans_EXF-150,5580,Aureobasidium pullulans,EXF-150,Ascomycota,Pezizomycotina,Dothideomycetes,Dothideomycetidae,Dothideales,Saccotheciaceae,Aureobasidium,Aureobasidium pullulans
+GCF_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assembly_version_1.0,5580,Aureobasidium pullulans,EXF-150,Ascomycota,Pezizomycotina,Dothideomycetes,Dothideomycetidae,Dothideales,Saccotheciaceae,Aureobasidium,Aureobasidium pullulans
 GCA_003992365.1_ASM399236v1,1771980,Aureobasidium sp. P6,P6,Ascomycota,Pezizomycotina,Dothideomycetes,Dothideomycetidae,Dothideales,Saccotheciaceae,Aureobasidium,Aureobasidium sp. P6
 GCF_000721755.1_Aureobasidium_pullulans_var._subglaciale_EXF-2481_v1.0,1042127,Aureobasidium subglaciale,EXF-2481,Ascomycota,Pezizomycotina,Dothideomycetes,Dothideomycetidae,Dothideales,Saccotheciaceae,Aureobasidium,Aureobasidium subglaciale
 GCA_002092955.1_ASM209295v1,29892,Auricularia auricula-judae,B14-8,Basidiomycota,Agaricomycotina,Agaricomycetes,,Auriculariales,Auriculariaceae,Auricularia,Auricularia auricula-judae
@@ -558,7 +558,7 @@ GCA_007388115.1_STR0027621,2546455,Coniochaeta sp. IL0111,IL0111,Ascomycota,Pezi
 GCA_007388135.1_STR0027633,2546454,Coniochaeta sp. NC1642,NC1642,Ascomycota,Pezizomycotina,Sordariomycetes,Sordariomycetidae,Coniochaetales,Coniochaetaceae,Coniochaeta,Coniochaeta sp. NC1642
 GCA_007388125.1_STR0027631,2546453,Coniochaeta sp. YLH0009,YLH0009,Ascomycota,Pezizomycotina,Sordariomycetes,Sordariomycetidae,Coniochaetales,Coniochaetaceae,Coniochaeta,Coniochaeta sp. YLH0009
 GCF_000271625.1_Conpu1,80637,Coniophora puteana,RWD-64-598 SS2,Basidiomycota,Agaricomycotina,Agaricomycetes,Agaricomycetidae,Boletales,Coniophoraceae,Coniophora,Coniophora puteana
-GCF_000281105.1_Coni_apol_CBS100218__V1,61459,Coniosporium apollinis,CBS 100218,Ascomycota,Pezizomycotina,Dothideomycetes,,,,Coniosporium,Coniosporium apollinis
+GCF_000281105.1_Coni_apol_CBS100218_V1,61459,Coniosporium apollinis,CBS 100218,Ascomycota,Pezizomycotina,Dothideomycetes,,,,Coniosporium,Coniosporium apollinis
 GCA_004523985.2_ASM452398v2,1077358,Coniothyrium glycines,13,Ascomycota,Pezizomycotina,Dothideomycetes,Pleosporomycetidae,Pleosporales,Coniothyriaceae,Coniothyrium,Coniothyrium glycines
 GCA_013368325.1_LU_COA_1.0,980116,Coprinellus angulatus,CBS 175.51,Basidiomycota,Agaricomycotina,Agaricomycetes,Agaricomycetidae,Agaricales,Psathyrellaceae,Coprinellus,Coprinellus angulatus
 GCA_004369175.1_Copmic2,71717,Coprinellus micaceus,FP101781,Basidiomycota,Agaricomycotina,Agaricomycetes,Agaricomycetidae,Agaricales,Psathyrellaceae,Coprinellus,Coprinellus micaceus
