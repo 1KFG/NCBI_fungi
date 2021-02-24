@@ -25,7 +25,7 @@ parser.add_argument('--outfile', default="assembly_stats.csv",
 
 args = parser.parse_args()
 asm_info = ["Date","Genome coverage", "Assembly method","Sequencing technology", "Assembly type", "Assembly level"]
-asm_stats = ["scaffold-N50", "scaffold-count", "total-length", "ungapped-length"]
+asm_stats = ["scaffold-N50", "scaffold-count", "total-length"]
 revised_accessions = set()
 accessions = set()
 
@@ -45,9 +45,9 @@ for col in header:
     i += 1
 
 sumparse = re.compile(r'^\#\s+([^:]+):\s+(.+)')
-for row in csvin:
-    folder = os.path.join(args.asmdir, row[col2num["ASM_ACCESSION"]])
-    statsfile = os.path.join(folder,"{}_assembly_stats.txt".format(row[col2num["ASM_ACCESSION"]]))
+for inrow in csvin:
+    folder = os.path.join(args.asmdir, inrow[col2num["ASM_ACCESSION"]])
+    statsfile = os.path.join(folder,"{}_assembly_stats.txt".format(inrow[col2num["ASM_ACCESSION"]]))
 
     parse_stats = 0
     this_asm_stats = {}
@@ -71,15 +71,15 @@ for row in csvin:
                         this_asm_info[m.group(1)] = m.group(2)
     for c in asm_info:
         if c in this_asm_info:
-            row.append(this_asm_info[c])
+            inrow.append(this_asm_info[c])
         else:
-            row.append("")
+            inrow.append("")
     for c in asm_stats:
         if c in this_asm_stats:
-            row.append(this_asm_stats[c])
+            inrow.append(this_asm_stats[c])
         else:
-            row.append("")
-    csvout.writerow(row)
+            inrow.append("")
+    csvout.writerow(inrow)
 
 # with open(filename) as infile:
 #     with open(outfilename, "a") as outfile:

@@ -13,7 +13,7 @@ args = parser.parse_args()
 with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"wt") as outcsv:
     data = json.load(jsonin)
     outcsvtbl = csv.writer(outcsv,delimiter=",")
-    outcsvtbl.writerow(['ACCESSION','SPECIES','STRAIN','NCBI_TAXID','BIOPROJECT','N50'])
+    outcsvtbl.writerow(['ACCESSION','SPECIES','STRAIN','NCBI_TAXID','BIOPROJECT','N50','ASM_NAME'])
     rows = {}
 
     for assembly in data["assemblies"]:
@@ -25,6 +25,10 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"wt") 
             continue
 
         accession = assembly['assembly']['assembly_accession']
+        assembly_name= assembly['assembly']['display_name']
+        assembly_name = re.sub(r',','',assembly_name)
+        assembly_name = re.sub(r'[\(\)\/]','_',assembly_name)
+        assembly_name = re.sub(r' _V','_V',assembly_name)
         #print(seen)
 
         bioprojects = set()
@@ -34,7 +38,7 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"wt") 
             strain  = assembly['assembly']['org']["strain"]
         elif 'isolate' in  assembly['assembly']['org']:
             strain  = assembly['assembly']['org']["isolate"]
-
+        strain = re.sub(r',\s+',';',strain)
         taxid   = assembly['assembly']['org']['tax_id']
         rank = ""
         if 'rank' in assembly['assembly']['org']:
@@ -56,9 +60,9 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"wt") 
         #print("accession is {} bioprojects={}".format(accession,bioprojects))
         if species in rows:
             if accession.startswith("GCF_"):
-                rows[species] = [accession,species,strain,taxid,";".join(bioprojects),n50]
+                rows[species] = [accession,species,strain,taxid,";".join(bioprojects),n50,assembly_name]
         else:
-            rows[species] = [accession,species,strain,taxid,";".join(bioprojects),n50]
+            rows[species] = [accession,species,strain,taxid,";".join(sorted(bioprojects)),n50,assembly_name]
 
     for species in sorted(rows.keys()):
         outcsvtbl.writerow(rows[species])

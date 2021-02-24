@@ -6,7 +6,7 @@ use DB_File;
 
 my %lookup;
 my $cachefile = 'names.idx';
-my $accin     = 'lib/ncbi_accessions.csv';
+my $accin     = shift || 'lib/ncbi_accessions.csv';
 
 tie %lookup, "DB_File", $cachefile, O_RDWR | O_CREAT, 0666, $DB_HASH
   or die "Cannot open file '$cachefile': $!\n";
