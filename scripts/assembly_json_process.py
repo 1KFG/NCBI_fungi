@@ -13,7 +13,7 @@ args = parser.parse_args()
 with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"wt") as outcsv:
     data = json.load(jsonin)
     outcsvtbl = csv.writer(outcsv,delimiter=",")
-    outcsvtbl.writerow(['ACCESSION','SPECIES','STRAIN','NCBI_TAXID','BIOPROJECT','N50','ASM_NAME'])
+    outcsvtbl.writerow(['ACCESSION','SPECIES','STRAIN','NCBI_TAXID','BIOPROJECT','ASM_LENGTH','N50','ASM_NAME'])
     rows = {}
 
     for assembly in data["assemblies"]:
@@ -52,6 +52,7 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"wt") 
         else:
             print("no rank for {}".format(species))
         n50     = assembly['assembly']['contig_n50']
+        seqlength = assembly['assembly']['seq_length']
         for bioproject in assembly['assembly']['bioproject_lineages']:
             for proj,dat in bioproject.items():
                 for acc in dat:
@@ -60,9 +61,9 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"wt") 
         #print("accession is {} bioprojects={}".format(accession,bioprojects))
         if species in rows:
             if accession.startswith("GCF_"):
-                rows[species] = [accession,species,strain,taxid,";".join(bioprojects),n50,assembly_name]
+                rows[species] = [accession,species,strain,taxid,";".join(bioprojects),seqlength,n50,assembly_name]
         else:
-            rows[species] = [accession,species,strain,taxid,";".join(sorted(bioprojects)),n50,assembly_name]
+            rows[species] = [accession,species,strain,taxid,";".join(sorted(bioprojects)),seqlength,n50,assembly_name]
 
     for species in sorted(rows.keys()):
         outcsvtbl.writerow(rows[species])
