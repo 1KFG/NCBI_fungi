@@ -7,7 +7,8 @@ import csv
 import os
 import re
 import argparse
-
+#from BCBio import GFF
+import gffutils
 def translator(s): return re.sub(r'[\s\-]', '_', s)
 
 
@@ -22,10 +23,19 @@ parser.add_argument('--infile', default="lib/ncbi_accessions_taxonomy.csv",
 parser.add_argument('--outfile', default="assembly_stats.csv",
                     type=argparse.FileType('w'),
                     help="Output file for summarizing the assembly statistics and taxonomy info")
-
+parser.add_argument('--force', default=False, action='store_true', help="Force rebuild index")
+parser.add_argument('-v','--verbose', default=False, action='store_true', help="Verbose mode")
+parser.add_argument('-n', '--index', default=1, help="Index of line to process")
+parser.add_argument('--headeronly', default=False, action='store_true', help="Only Print Header")
+parser.add_argument('--noheader', default=False, action='store_true', help="Only Print Header")
+parser.add_argument('--tmp', default="/scratch", help="Temp folder")
 args = parser.parse_args()
+
+args.index = int(args.index)
 asm_info = ["Date","Genome coverage", "Assembly method","Sequencing technology", "Assembly type", "Assembly level"]
 asm_stats = ["scaffold-N50", "scaffold-count", "total-length"]
+gene_stats = ["gene_count","gene_length_mean","exon_count","exon_length_mean","CDS_count","CDS_length_mean","intron_count","intron_length_mean"]
+
 revised_accessions = set()
 accessions = set()
 
@@ -33,10 +43,15 @@ csvin = csv.reader(args.infile, delimiter=",")
 csvout = csv.writer(args.outfile, delimiter=",")
 header = next(csvin)
 
+
 header.extend([translator(s) for s in asm_info])
 header.extend([translator(s) for s in asm_stats])
+header.extend([translator(s) for s in gene_stats])
+if not args.noheader:
+    csvout.writerow(header)
 
-csvout.writerow(header)
+if args.headeronly:
+    exit()
 
 col2num = {}
 i = 0
@@ -45,10 +60,14 @@ for col in header:
     i += 1
 
 sumparse = re.compile(r'^\#\s+([^:]+):\s+(.+)')
+i = 1
+
 for inrow in csvin:
+    if i != args.index:
+        i += 1
+        continue
     folder = os.path.join(args.asmdir, inrow[col2num["ASM_ACCESSION"]])
     statsfile = os.path.join(folder,"{}_assembly_stats.txt".format(inrow[col2num["ASM_ACCESSION"]]))
-
     parse_stats = 0
     this_asm_stats = {}
     this_asm_info = {}
@@ -69,6 +88,51 @@ for inrow in csvin:
                     m = sumparse.match(line)
                     if m:
                         this_asm_info[m.group(1)] = m.group(2)
+    gff_file = os.path.join(folder,"{}_genomic.gff.gz".format(inrow[col2num["ASM_ACCESSION"]]))
+    db_file  = os.path.join(folder,"{}_genomic.gff.db".format(inrow[col2num["ASM_ACCESSION"]]))
+    this_gene_stats = {}
+    for k in gene_stats:
+        this_gene_stats[k] = 0
+
+    if os.path.exists(gff_file):
+        final_db_file = os.path.join(folder,"{}_genomic.gff.db".format(inrow[col2num["ASM_ACCESSION"]]))
+        if not os.path.exists(final_db_file):
+            tmpdb_file  = os.path.join(args.tmp,"{}_genomic.gff.db".format(inrow[col2num["ASM_ACCESSION"]]))
+            if args.verbose:
+                print("indexing {} as {}".format(gff_file,final_db_file))
+            db = gffutils.create_db(gff_file, dbfn=tmpdb_file, force=args.force, keep_order=True, merge_strategy='merge', sort_attribute_values=True)
+            shutil.move(tmpdb_file,final_db_file)
+
+        db = gffutils.FeatureDB(final_db_file)
+
+        this_gene_stats['gene_count'] = db.count_features_of_type('gene')
+        this_gene_stats['exon_count'] = db.count_features_of_type('exon')
+        this_gene_stats['CDS_count'] = db.count_features_of_type('CDS')
+
+        for gene in db.features_of_type('gene'):
+            this_gene_stats['gene_length_mean'] += len(gene)
+        for exon in db.features_of_type('exon'):
+            this_gene_stats['exon_length_mean'] += len(exon)
+        for cds in db.features_of_type('CDS'):
+            this_gene_stats['CDS_length_mean'] += len(cds)
+
+        for intron in db.create_introns():
+            if intron.start > 0 and intron.end > 0:
+                if intron.end < intron.start:
+                    this_gene_stats['intron_length_mean'] += abs(intron.start - intron.end) + 1
+                else:
+                    this_gene_stats['intron_length_mean'] += len(intron)
+                this_gene_stats['intron_count'] += 1
+
+        if this_gene_stats['gene_count'] > 0:
+            this_gene_stats['gene_length_mean'] /= this_gene_stats['gene_count']
+        if this_gene_stats['exon_count'] > 0:
+            this_gene_stats['exon_length_mean'] /= this_gene_stats['exon_count']
+        if this_gene_stats['CDS_count'] > 0:
+            this_gene_stats['CDS_length_mean'] /= this_gene_stats['CDS_count']
+        if this_gene_stats['intron_count'] > 0:
+            this_gene_stats['intron_length_mean'] /= this_gene_stats['intron_count']
+
     for c in asm_info:
         if c in this_asm_info:
             inrow.append(this_asm_info[c])
@@ -79,8 +143,14 @@ for inrow in csvin:
             inrow.append(this_asm_stats[c])
         else:
             inrow.append("")
-    csvout.writerow(inrow)
+    for c in gene_stats:
+        if c in this_gene_stats:
+            inrow.append(this_gene_stats[c])
+        else:
+            inrow.append("")
 
+    csvout.writerow(inrow)
+    i += 1
 # with open(filename) as infile:
 #     with open(outfilename, "a") as outfile:
 #         csvfile = csv.reader(infile)
