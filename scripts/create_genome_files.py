@@ -46,8 +46,8 @@ sumparse = re.compile(r'^\#\s+([^:]+):\s+(.+)')
 i = 1
 
 for inrow in csvin:
+    i += 1 # line 1 is the header so we add before checking value
     if i != args.index:
-        i += 1
         continue
     folder = os.path.join(args.asmdir, inrow[col2num["ASM_ACCESSION"]])
     fasta_file = os.path.join(folder,genomeExtension.format(inrow[col2num["ASM_ACCESSION"]]))
