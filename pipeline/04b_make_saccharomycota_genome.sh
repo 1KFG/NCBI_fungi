@@ -7,6 +7,6 @@ DAT=lib/ncbi_accessions_taxonomy.csv
 
 for RUNID in $(grep -n Saccharomycotina $DAT | cut -d: -f1)
 do
-  time ./scripts/create_genome_files.py -n $RUNID --infile $DAT --outfolder asm_Saccharomycotina
+  ./scripts/create_genome_files.py -n $RUNID --infile $DAT --outfolder asm_Saccharomycotina
   echo $RUNID
 done
