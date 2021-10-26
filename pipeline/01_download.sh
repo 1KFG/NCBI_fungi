@@ -1,5 +1,5 @@
-#!/usr/bin/bash
-#SBATCH -p short --out logs/download.%a.log
+#!/usr/bin/bash -l
+#SBATCH -p short --out logs/download.%a.log -a 1-6
 module load aspera
 DAT=lib/ncbi_accessions.csv
 #ACCESSION,SPECIES,STRAIN,NCBI_TAXID,BIOPROJECT,N50,ASM_NAME
@@ -26,8 +26,9 @@ fi
 echo "$NSTART -> $NEND"
 mkdir -p $OUT
 IFS=,
-tail -n +2 $DAT | sed -n ${NSTART},${NEND}p | while read ACCESSION SPECIES STRAIN TAXID BIOPROJECT N50 ASMNAME
+tail -n +2 $DAT | sed -n ${NSTART},${NEND}p | while read ACCESSION SPECIES STRAIN TAXID BIOPROJECT LEN N50 ASMNAME
 do
+	#echo -e "ASMNAME is '$ASMNAME'"
 	PRE=$(echo $ACCESSION | cut -d_ -f1 )
 	ONE=$(echo $ACCESSION | cut -d_ -f2 | awk '{print substr($1,1,3)}')
 	TWO=$(echo $ACCESSION | cut -d_ -f2 | awk '{print substr($1,4,3)}')
