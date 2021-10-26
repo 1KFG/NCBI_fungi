@@ -10,9 +10,9 @@ parser.add_argument('--outfile',dest='outfile',default="ncbi_accessions.csv",hel
 
 args = parser.parse_args()
 
-with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"wt") as outcsv:
+with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"w",newline='') as outcsv:
     data = json.load(jsonin)
-    outcsvtbl = csv.writer(outcsv,delimiter=",")
+    outcsvtbl = csv.writer(outcsv,dialect="unix",quoting=csv.QUOTE_MINIMAL)
     outcsvtbl.writerow(['ACCESSION','SPECIES','STRAIN','NCBI_TAXID','BIOPROJECT','ASM_LENGTH','N50','ASM_NAME'])
     rows = {}
 
@@ -67,3 +67,4 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"wt") 
 
     for species in sorted(rows.keys()):
         outcsvtbl.writerow(rows[species])
+
