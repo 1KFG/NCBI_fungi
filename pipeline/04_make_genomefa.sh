@@ -1,5 +1,5 @@
 #!/usr/bin/bash -l
-#SBATCH -p short -N 1 -n 1 --mem 4gb --out logs/makedb.%a.log
+#SBATCH -p short -N 1 -n 1 --mem 4gb --out logs/makedb.%A.log
 
 
 module load miniconda3

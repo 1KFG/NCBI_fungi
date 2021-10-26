@@ -43,7 +43,7 @@ open( my $fh => $accin )
 my $header = <$fh>;
 while (<$fh>) {
     chomp;
-    my ( $acc, $species, $strain, $ncbi_taxid, $bioproject, $n50, $asm_name ) =
+    my ( $acc, $species, $strain, $ncbi_taxid, $bioproject, $asmlen, $n50, $asm_name ) =
       split( /,/, $_ );
     $asm_name =~ s/ /_/g;
     my $asmacc = join( "_", $acc, $asm_name );

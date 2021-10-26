@@ -11,6 +11,6 @@ if [ ! -f $BINDIR/datasets ]; then
 fi
 ACCESSION=lib/ncbi_accessions.json
 
-if [ ! -s ]; then
+if [ ! -s $ACCESSION ]; then
 	$BINDIR/datasets summary genome taxon fungi > $ACCESSION
 fi

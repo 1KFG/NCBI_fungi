@@ -1,6 +1,5 @@
 #!/usr/bin/bash -l
-#SBATCH -p short -N 1 -n 1 --mem 1gb --out logs/makedb.%a.log
-
+#SBATCH -p short -N 1 -n 1 --mem 1gb --out logs/makedb.%a.log -a 1
 
 module load miniconda3
 conda activate bcbio

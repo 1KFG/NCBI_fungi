@@ -5,7 +5,7 @@
 import sys
 import csv
 import os
-import re
+import re, shutil
 import argparse
 #from BCBio import GFF
 import gffutils
