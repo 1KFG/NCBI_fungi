@@ -1,5 +1,5 @@
 #!/usr/bin/bash -l
-#SBATCH -p short --out logs/download.%a.log -a 1-6
+#SBATCH -p short --out logs/download.%a.log -a 1-8
 module load aspera
 DAT=lib/ncbi_accessions.csv
 #ACCESSION,SPECIES,STRAIN,NCBI_TAXID,BIOPROJECT,N50,ASM_NAME

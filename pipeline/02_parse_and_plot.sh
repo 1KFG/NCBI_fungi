@@ -1,9 +1,9 @@
-#!/usr/bin/bash
-#SBATCH -p short -C xeon --mem 64gb -N 1 -n 64 --out logs/parse_genome_stats.log
+#!/usr/bin/bash -l
+#SBATCH -p short --mem 64gb -N 1 -n 64 --out logs/parse_genome_stats.log
 
 module load parallel
 module load miniconda3
-source activate bcbio
+conda activate ./bcbio-env
 CPU=2
 if [ ! -z $SLURM_CPUS_ON_NODE ]; then
 	CPU=$SLURM_CPUS_ON_NODE

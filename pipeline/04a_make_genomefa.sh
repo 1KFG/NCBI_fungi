@@ -10,6 +10,6 @@ module load miniconda3
 module load parallel
 DAT=lib/ncbi_accessions_taxonomy.csv
 
-MAX=$(wc -l $DAT| awk '{print $1}')
+MAX=$(wc -l $DAT | awk '{print $1}')
 parallel -j $CPU ./scripts/create_genome_files.py -n {} --infile $DAT ::: $(seq $MAX)
 

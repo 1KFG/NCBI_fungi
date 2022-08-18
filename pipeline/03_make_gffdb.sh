@@ -1,8 +1,8 @@
 #!/usr/bin/bash -l
-#SBATCH -p short -N 1 -n 1 --mem 1gb --out logs/makedb.%a.log -a 1
+#SBATCH -p short -N 1 -n 1 --mem 1gb --out logs/makedb.%a.log -a 1-3
 
 module load miniconda3
-conda activate bcbio
+conda activate ./bcbio-env
 DAT=lib/ncbi_accessions_taxonomy.csv
 
 N=${SLURM_ARRAY_TASK_ID}
@@ -14,7 +14,7 @@ if [ -z $N ]; then
   exit
 fi
 
-INTERVAL=5
+INTERVAL=50
 NSTART=$(perl -e "printf('%d',1 + $INTERVAL * ($N - 1))")
 NEND=$(perl -e "printf('%d',$INTERVAL * $N)")
 MAX=$(wc -l $DAT| awk '{print $1}')
