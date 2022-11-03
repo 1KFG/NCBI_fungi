@@ -1,5 +1,5 @@
 #!/usr/bin/bash -l
-#SBATCH -p short --mem 24gb -C xeon
+#SBATCH -p short --mem 24gb -C xeon --out logs/init_parse.log
 
 bash scripts/get_ncbi_datasets.sh
 bash scripts/get_taxonkit.sh
