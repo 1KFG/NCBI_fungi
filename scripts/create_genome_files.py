@@ -8,7 +8,7 @@ import argparse
 
 def translator(s): return re.sub(r'[\s\-]', '_', s)
 genomeExtension = "{}_genomic.fna.gz"
-
+dir_type = ['DNA','CDS','pep']
 parser = argparse.ArgumentParser(description='Create genome assembly files named by species and strain',
                                  epilog="Generate input file by running perl scripts/make_taxonomy_table.pl > lin/ncbi_accessions_taxonomy.csv")
 parser.add_argument('--asmdir', default="source/NCBI_ASM",
@@ -60,7 +60,7 @@ for inrow in csvin:
         species_info=inrow[col2num["SPECIES"]]
     species = re.sub(r'[\[\]\(\)]','',species_info)
     species = re.sub(r'\s+','_',species)
-    fname = "{}.fasta".format(species)
+    fname = "{}.dna.fasta".format(species)
     outfasta   = os.path.join(args.outfolder,fname)
 
     if os.path.exists(outfasta) and not args.force:
@@ -74,3 +74,5 @@ for inrow in csvin:
     else:
         print("No FASTA file for {} as {}".format(species,fasta_file))
         break
+
+    # need to add protein (and rename CDS IDs), GFF, CDS files
