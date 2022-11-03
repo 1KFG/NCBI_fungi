@@ -1,4 +1,4 @@
-#!/usr/bin/
+#!/usr/bin/bash -l
 
 BINDIR=bin
 mkdir -p $BINDIR

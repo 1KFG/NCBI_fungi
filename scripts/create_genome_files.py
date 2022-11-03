@@ -51,7 +51,13 @@ for inrow in csvin:
         continue
     folder = os.path.join(args.asmdir, inrow[col2num["ASM_ACCESSION"]])
     fasta_file = os.path.join(folder,genomeExtension.format(inrow[col2num["ASM_ACCESSION"]]))
-    species = re.sub(r'[\[\]\(\)]','',inrow[col2num["SPECIES"]])
+    species_info = ""
+    if len(inrow) < col2num["SPECIES"]:
+        print("inrow doesn't have species column {}".format(inrow))
+        species_info=inrow[col2num["SPECIES_IN"]]
+    else:
+        species_info=inrow[col2num["SPECIES"]]
+    species = re.sub(r'[\[\]\(\)]','',species_info)
     species = re.sub(r'\s+','_',species)
     fname = "{}.dna.fasta".format(species)
     outfasta   = os.path.join(args.outfolder,'DNA',fname)
