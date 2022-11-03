@@ -60,7 +60,7 @@ csvout.writerow(newheader)
 for inrow in csvin:
     # want to save a subset of cols but we could always just make this a mashup of the two sets too
     # for simplicity, not sure the reasoning for this TBH
-    acc = re.sub(r'\s+','_',inrow[col2num['ACCESSION']]+inrow[col2num['ASM_NAME']])
+    acc = re.sub(r'\s+','_',inrow[col2num['ACCESSION']]+"_"+inrow[col2num['ASM_NAME']])
     row = [ acc,
             inrow[col2num["NCBI_TAXID"]],
             inrow[col2num["SPECIES"]],
