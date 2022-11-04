@@ -57,6 +57,8 @@ i =0
 msg = ''
 csvout = csv.writer(args.outfile,delimiter=",")
 csvout.writerow(newheader)
+msg = []
+rows = {}
 for inrow in csvin:
     # want to save a subset of cols but we could always just make this a mashup of the two sets too
     # for simplicity, not sure the reasoning for this TBH
@@ -67,20 +69,28 @@ for inrow in csvin:
             inrow[col2num["STRAIN"]],
     ]
     row.extend([""]*8)
-    msg = inrow[col2num["NCBI_TAXID"]]
-    p = Popen([args.taxonkit,'--data-dir',args.taxonkitdir,'--threads',args.cpus,
-               'reformat', '-I','1', '-P'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    rows[inrow[col2num["NCBI_TAXID"]]] = row
+    msg.append( inrow[col2num["NCBI_TAXID"]] )
 
-    (so,se) = p.communicate(input=msg.encode())
-    if len(so) == 0:
-        print("error no result for {}, error is {}".format(msg,se))
-    else:
-        for str in so.decode().splitlines():
-            taxrow = str.split("\t")
-            lineagestr = taxrow[1]
+p = Popen([args.taxonkit,'--data-dir',args.taxonkitdir,'--threads',args.cpus,
+           'reformat', '-I','1', '-P'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+combined = "\n".join(msg)+"\n"
+(so,se) = p.communicate(input=combined.encode())
+if len(so) == 0:
+    print("error no result for {}, error is {}".format(msg,se))
+else:
+    for str in so.decode().splitlines():
+        taxrow = str.split("\t")
+        ncbi_id = taxrow[0]
+        lineagestr = taxrow[1]
+        if ncbi_id not in rows:
+            print("cannot find {} in db of rows?".format(ncbi_id))
+            continue
+        else:
+            row = rows[ncbi_id]
             for l in lineagestr.split(';'):
                 (rank,name) = l.split("__",2)
                 if rank in rankToName:
                     colnum = newoutcol2num[rankToName[rank]]
                     row[colnum] = name
-    csvout.writerow(row)
+            csvout.writerow(row)
