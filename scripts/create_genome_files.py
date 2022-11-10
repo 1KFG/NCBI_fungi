@@ -41,7 +41,7 @@ for col in header:
     i += 1
 
 sumparse = re.compile(r'^\#\s+([^:]+):\s+(.+)')
-i = 0
+i = 1
 
 
 for inrow in csvin:
