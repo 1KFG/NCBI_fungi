@@ -7,8 +7,12 @@ import gzip, shutil, re, os, csv
 import argparse
 
 def translator(s): return re.sub(r'[\s\-]', '_', s)
-genomeExtension = "{}_genomic.fna.gz"
-dir_type = ['DNA','CDS','pep']
+
+# [dir_type, input file extension, output file extension]
+genomeAttr = ['DNA', "genomic.fna.gz", "dna.fasta"]
+cdsAttr = ['CDS', "cds_from_genomic.fna.gz", "cds.fasta"]
+proteinAttr = ['pep', "protein.faa.gz", "pep.fasta"]
+
 parser = argparse.ArgumentParser(description='Create genome assembly files named by species and strain',
                                  epilog="Generate input file by running perl scripts/make_taxonomy_table.pl > lin/ncbi_accessions_taxonomy.csv")
 parser.add_argument('--asmdir', default="source/NCBI_ASM",
@@ -28,8 +32,8 @@ args = parser.parse_args()
 
 args.index = int(args.index)
 
-if not os.path.exists(args.outfolder):
-    os.mkdir(args.outfolder)
+for dir_type, _, _ in (genomeAttr, cdsAttr, proteinAttr):
+    os.makedirs(os.path.join(args.outfolder, dir_type), exist_ok=True)
 
 csvin = csv.reader(args.infile, delimiter=",")
 header = next(csvin)
@@ -51,7 +55,7 @@ for inrow in csvin:
         continue
 
     folder = os.path.join(args.asmdir, inrow[col2num["ASM_ACCESSION"]])
-    fasta_file = os.path.join(folder,genomeExtension.format(inrow[col2num["ASM_ACCESSION"]]))
+    
     species_info = ""
     if len(inrow) < col2num["SPECIES"]:
         print("inrow doesn't have species column {}".format(inrow))
@@ -59,20 +63,24 @@ for inrow in csvin:
     else:
         species_info=inrow[col2num["SPECIES"]]
     species = re.sub(r'[\[\]\(\)]','',species_info)
+    species = re.sub(r'/','_',species)
     species = re.sub(r'\s+','_',species)
-    fname = "{}.dna.fasta".format(species)
-    outfasta   = os.path.join(args.outfolder,fname)
 
-    if os.path.exists(outfasta) and not args.force:
-        if args.verbose:
-            print("Skipping {} as {} already exists".format(inrow[col2num["SPECIES"]],outfasta))
-        continue
+    for dir_type, inputExtension, outputExtension in (genomeAttr, cdsAttr, proteinAttr):
+        fasta_file = os.path.join(folder, "{}_{}".format(inrow[col2num["ASM_ACCESSION"]], inputExtension))
+        fname = "{}.{}".format(species, outputExtension)
+        outfasta   = os.path.join(args.outfolder, dir_type, fname)
 
-    if os.path.exists(fasta_file):
-        with gzip.open(fasta_file,'rb') as fhin, open(outfasta,"wb") as fhout:
-            shutil.copyfileobj(fhin, fhout)
-    else:
-        print("No FASTA file for {} as {}".format(species,fasta_file))
-        break
+        if os.path.exists(outfasta) and not args.force:
+            if args.verbose:
+                print("Skipping {} as {} already exists".format(inrow[col2num["SPECIES"]],outfasta))
+            continue
+
+        if os.path.exists(fasta_file):
+            with gzip.open(fasta_file,'rb') as fhin, open(outfasta,"wb") as fhout:
+                shutil.copyfileobj(fhin, fhout)
+        else:
+            print("No FASTA file for {} as {}".format(species,fasta_file))
+            continue
 
     # need to add protein (and rename CDS IDs), GFF, CDS files
