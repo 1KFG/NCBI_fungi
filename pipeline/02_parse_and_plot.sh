@@ -2,8 +2,7 @@
 #SBATCH -p short --mem 64gb -N 1 -n 64 --out logs/parse_genome_stats.log
 
 module load parallel
-module load miniconda3
-conda activate ./bcbio-env
+module load biopython/1.70
 CPU=2
 if [ ! -z $SLURM_CPUS_ON_NODE ]; then
 	CPU=$SLURM_CPUS_ON_NODE
