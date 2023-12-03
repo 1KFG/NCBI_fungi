@@ -1,5 +1,5 @@
 #!/usr/bin/bash -l
-#SBATCH -p short -N 1 -n 1 -c 8 --mem 24gb -C xeon --out logs/init_parse.log
+#SBATCH -p short -N 1 -n 1 -c 8 --mem 8gb -C xeon --out logs/init_parse.log
 
 CPU=8
 bash scripts/get_ncbi_datasets.sh
