@@ -1,5 +1,5 @@
 #!/usr/bin/bash -l
-#SBATCH -p short --out logs/download.%a.log -a 1-8
+#SBATCH -p short --out logs/download.%a.log -a 1-11
 module load aspera
 DAT=lib/ncbi_accessions.csv
 #ACCESSION,SPECIES,STRAIN,NCBI_TAXID,BIOPROJECT,N50,ASM_NAME
@@ -36,6 +36,7 @@ do
 	ASMNAME=$(echo $ASMNAME | perl -p -e 's/ /_/g')
 	echo "anonftp@ftp.ncbi.nlm.nih.gov:/genomes/all/$PRE/$ONE/$TWO/$THREE/${ACCESSION}_$ASMNAME/"
 	if [ ! -d $OUT/${ACCESSION}_$ASMNAME ]; then
-		ascp -k1 -Tdr -l400M -i $ASPERAKEY --overwrite=diff anonftp@ftp.ncbi.nlm.nih.gov:/genomes/all/$PRE/$ONE/$TWO/$THREE/${ACCESSION}_$ASMNAME ./$OUT/
-	fi	
+#		ascp -k1 -Tdr -l400M -i $ASPERAKEY --overwrite=diff anonftp@ftp.ncbi.nlm.nih.gov:/genomes/all/$PRE/$ONE/$TWO/$THREE/${ACCESSION}_$ASMNAME ./$OUT/
+		rsync --exclude README.txt -a rsync://ftp.ncbi.nlm.nih.gov:/genomes/all/$PRE/$ONE/$TWO/$THREE/${ACCESSION}_$ASMNAME ./$OUT/
+	fi
 done
