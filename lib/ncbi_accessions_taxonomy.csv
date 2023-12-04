@@ -846,7 +846,7 @@ GCA_022702355.1_ASM2270235v1,348901,Cercospora zeina,YN,Ascomycota,,Dothideomyce
 GCA_022592435.1_Polsqu1,2829415,Cerioporus squamosus,CCBS 676,Basidiomycota,,Agaricomycetes,,Polyporales,Polyporaceae,Cerioporus,Cerioporus squamosus
 GCA_001969225.1_ASM196922v1,1149723,Ceriporiopsis andreanae CBS 279.92,CBS 279.92,Basidiomycota,,Agaricomycetes,,Polyporales,Meruliaceae,Ceriporiopsis,Ceriporiopsis andreanae
 GCA_003521265.1_NYBG_CetLin_1.0,83788,Cetradonia linearis,BA2,Ascomycota,,Lecanoromycetes,,Lecanorales,Cetradoniaceae,Cetradonia,Cetradonia linearis
-GCA_910591915.1_Cetraspora_pellucida__FL966,1433469,Cetraspora pellucida,FL966,Mucoromycota,,Glomeromycetes,,Diversisporales,Gigasporaceae,Cetraspora,Cetraspora pellucida
+GCA_910591915.1_Cetraspora_pellucida_FL966,1433469,Cetraspora pellucida,FL966,Mucoromycota,,Glomeromycetes,,Diversisporales,Gigasporaceae,Cetraspora,Cetraspora pellucida
 GCA_026023695.1_ASM2602369v1,164576,Chaenotheca gracillima,Spribille 41657/TS-e1856-1857(pooled),Ascomycota,,Coniocybomycetes,,Coniocybales,Coniocybaceae,Chaenotheca,Chaenotheca gracillima
 GCA_023628455.1_ASM2362845v1,2939515,Chaetomiaceae sp. B2702,B2702,Ascomycota,,Sordariomycetes,,Sordariales,Chaetomiaceae,,Chaetomiaceae sp. B2702
 GCA_023628475.1_ASM2362847v1,2939516,Chaetomiaceae sp. PF1801,PF1801,Ascomycota,,Sordariomycetes,,Sordariales,Chaetomiaceae,,Chaetomiaceae sp. PF1801
@@ -3034,7 +3034,7 @@ GCF_024244105.1_nmin_JUm1510,1912983,Nematocida minor,JUm1510,Microsporidia,,,,,
 GCF_000250985.1_Nema_parisii_ERTm1_V3,881290,Nematocida parisii ERTm1,ERTm1,Microsporidia,,,,,,Nematocida,Nematocida parisii
 GCA_024244115.1_ncid_AWRm77,2670344,Nematocida sp. AWRm77,AWRm77,Microsporidia,,,,,,Nematocida,Nematocida sp. AWRm77
 GCA_024244055.1_niro_AWRm78,2670341,Nematocida sp. AWRm78,AWRm78,Microsporidia,,,,,,Nematocida,Nematocida sp. AWRm78
-GCA_024243935.1_niro__AWRm79,2670342,Nematocida sp. AWRm79,AWRm79,Microsporidia,,,,,,Nematocida,Nematocida sp. AWRm79
+GCA_024243935.1_niro_AWRm79,2670342,Nematocida sp. AWRm79,AWRm79,Microsporidia,,,,,,Nematocida,Nematocida sp. AWRm79
 GCA_024244045.1_nokw_AWRm80,2670343,Nematocida sp. AWRm80,AWRm80,Microsporidia,,,,,,Nematocida,Nematocida sp. AWRm80
 GCA_001642415.1_ASM164241v1,1805481,Nematocida sp. ERTm5,ERTm5,Microsporidia,,,,,,Nematocida,Nematocida sp. ERTm5
 GCA_024244035.1_nfer_LUAm1,2670338,Nematocida sp. LUAm1,LUAm1,Microsporidia,,,,,,Nematocida,Nematocida sp. LUAm1
