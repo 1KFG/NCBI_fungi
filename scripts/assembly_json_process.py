@@ -35,7 +35,7 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"w",ne
         accession=assembly['accession']
         assembly_name=assembly['assembly_info']['assembly_name']
         # fix extra commas in name
-        assembly_name=assembly_name.replace(",","")
+        assembly_name=re.sub(r'[ ,_,/\\]+','_',assembly_name.strip())
 
         bioprojects = set()
         bioprojects.add(assembly['assembly_info']['bioproject_accession'])
