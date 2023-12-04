@@ -28,7 +28,7 @@ GCA_016098105.1_UCR_MwolfiiNRRL6351_1.0,90253,Actinomortierella wolfii,NRRL 6351
 GCA_026027325.1_ASM2602732v1,64647,Actinomucor elegans,CJ-6,Mucoromycota,,Mucoromycetes,,Mucorales,Mucoraceae,Actinomucor,Actinomucor elegans
 GCA_004216415.1_S18-22,2518135,Aeminium ludgeri,E14,Ascomycota,,Dothideomycetes,,Mycosphaerellales,Aeminiaceae,Aeminium,Aeminium ludgeri
 GCA_002718315.1_ASM271831v1,2607230,Agaricales sp. HM26-F1,HM26-F1,Basidiomycota,,Agaricomycetes,,Agaricales,,,Agaricales sp. HM26-F1
-GCF_000300575.1_Agabi_varbisH97_2,936046,Agaricus bisporus var. bisporus H97,H97,Basidiomycota,,Agaricomycetes,,Agaricales,Agaricaceae,Agaricus,Agaricus bisporus
+GCA_000300575.2_ASM30057v2,936046,Agaricus bisporus var. bisporus H97,H97,Basidiomycota,,Agaricomycetes,,Agaricales,Agaricaceae,Agaricus,Agaricus bisporus
 GCA_030246685.1_ASM3024668v1,5343,Agaricus bitorquis,BH01,Basidiomycota,,Agaricomycetes,,Agaricales,Agaricaceae,Agaricus,Agaricus bitorquis
 GCA_029719445.1_ASM2971944v1,79798,Agaricus blazei,JA-15036,Basidiomycota,,Agaricomycetes,,Agaricales,Agaricaceae,Agaricus,Agaricus blazei
 GCA_022315185.1_ASM2231518v1,1550288,Agaricus sinodeliciosus,ZRL20160001-S65,Basidiomycota,,Agaricomycetes,,Agaricales,Agaricaceae,Agaricus,Agaricus sinodeliciosus
@@ -592,7 +592,7 @@ GCA_030558545.1_ASM3055854v1,2695822,Bipolaris gigantea,15JK003,Ascomycota,,Doth
 GCF_000354255.1_CocheC4_1,665024,Bipolaris maydis ATCC 48331,ATCC 48331,Ascomycota,,Dothideomycetes,,Pleosporales,Pleosporaceae,Bipolaris,Bipolaris maydis
 GCF_000523455.1_Cochliobolus_miyabeanus_v1.0,930090,Bipolaris oryzae ATCC 44560,ATCC 44560,Ascomycota,,Dothideomycetes,,Pleosporales,Pleosporaceae,Bipolaris,Bipolaris oryzae
 GCF_000338995.1_Cocsa1,665912,Bipolaris sorokiniana ND90Pr,ND90Pr,Ascomycota,,Dothideomycetes,,Pleosporales,Pleosporaceae,Bipolaris,Bipolaris sorokiniana
-GCF_000527765.1_Cochliobolus_victoriae_v1.0,930091,Bipolaris victoriae FI3,FI3,Ascomycota,,Dothideomycetes,,Pleosporales,Pleosporaceae,Bipolaris,Bipolaris victoriae
+GCA_000527765.2_ANU_Cvic_canu1.6_pilon5,930091,Bipolaris victoriae FI3,FI3,Ascomycota,,Dothideomycetes,,Pleosporales,Pleosporaceae,Bipolaris,Bipolaris victoriae
 GCF_000523435.1_Cochliobolus_carbonum_v1.0,930089,Bipolaris zeicola 26-R-13,26-R-13,Ascomycota,,Dothideomycetes,,Pleosporales,Pleosporaceae,Bipolaris,Bipolaris zeicola
 GCA_022695795.1_Bisma1,110534,Biscogniauxia marginata,CBS 124505,Ascomycota,,Sordariomycetes,,Xylariales,Xylariaceae,Biscogniauxia,Biscogniauxia marginata
 GCA_018398605.1_FBL658_Bm01,97377,Biscogniauxia mediterranea,Bm01,Ascomycota,,Sordariomycetes,,Xylariales,Xylariaceae,Biscogniauxia,Biscogniauxia mediterranea
