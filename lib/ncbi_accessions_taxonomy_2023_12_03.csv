@@ -497,7 +497,7 @@ GCA_021014315.1_SQU_Amang_1.1,2895399,Aureobasidium mangrovei,SARA-138H,Ascomyco
 GCF_000721775.1_Aureobasidium_pullulans_var._melanogenum_CBS_110374_v1.0,1043003,Aureobasidium melanogenum CBS 110374,CBS 110374,Ascomycota,,Dothideomycetes,,Dothideales,Saccotheciaceae,Aureobasidium,Aureobasidium melanogenum
 GCA_903819665.1_AWRI4233,2773714,Aureobasidium mustum,,Ascomycota,,Dothideomycetes,,Dothideales,Saccotheciaceae,Aureobasidium,Aureobasidium mustum
 GCF_000721765.1_Aureobasidium_pullulans_var._namibiae_CBS_147.97_v1.0,1043004,Aureobasidium namibiae CBS 147.97,CBS 147.97,Ascomycota,,Dothideomycetes,,Dothideales,Saccotheciaceae,Aureobasidium,Aureobasidium namibiae
-"GCF_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150,_assembly_version_1.0",1043002,Aureobasidium pullulans EXF-150,EXF-150,Ascomycota,,Dothideomycetes,,Dothideales,Saccotheciaceae,Aureobasidium,Aureobasidium pullulans
+GCF_000721785.1_Aureobasidium_pullulans_var._pullulans_EXF-150_assembly_version_1.0,1043002,Aureobasidium pullulans EXF-150,EXF-150,Ascomycota,,Dothideomycetes,,Dothideales,Saccotheciaceae,Aureobasidium,Aureobasidium pullulans
 GCA_023848595.1_ASM2384859v1,2894284,Aureobasidium sp. EXF-10727,EXF-10727,Ascomycota,,Dothideomycetes,,Dothideales,Saccotheciaceae,Aureobasidium,Aureobasidium sp. EXF-10727
 GCA_023848605.1_ASM2384860v1,2894285,Aureobasidium sp. EXF-10728,EXF-10728,Ascomycota,,Dothideomycetes,,Dothideales,Saccotheciaceae,Aureobasidium,Aureobasidium sp. EXF-10728
 GCA_024195555.1_ASM2419555v1,2894281,Aureobasidium sp. EXF-12298,EXF-12298,Ascomycota,,Dothideomycetes,,Dothideales,Saccotheciaceae,Aureobasidium,Aureobasidium sp. EXF-12298
@@ -846,7 +846,7 @@ GCA_022702355.1_ASM2270235v1,348901,Cercospora zeina,YN,Ascomycota,,Dothideomyce
 GCA_022592435.1_Polsqu1,2829415,Cerioporus squamosus,CCBS 676,Basidiomycota,,Agaricomycetes,,Polyporales,Polyporaceae,Cerioporus,Cerioporus squamosus
 GCA_001969225.1_ASM196922v1,1149723,Ceriporiopsis andreanae CBS 279.92,CBS 279.92,Basidiomycota,,Agaricomycetes,,Polyporales,Meruliaceae,Ceriporiopsis,Ceriporiopsis andreanae
 GCA_003521265.1_NYBG_CetLin_1.0,83788,Cetradonia linearis,BA2,Ascomycota,,Lecanoromycetes,,Lecanorales,Cetradoniaceae,Cetradonia,Cetradonia linearis
-GCA_910591915.1_Cetraspora_pellucida__FL966,1433469,Cetraspora pellucida,FL966,Mucoromycota,,Glomeromycetes,,Diversisporales,Gigasporaceae,Cetraspora,Cetraspora pellucida
+GCA_910591915.1_Cetraspora_pellucida_FL966,1433469,Cetraspora pellucida,FL966,Mucoromycota,,Glomeromycetes,,Diversisporales,Gigasporaceae,Cetraspora,Cetraspora pellucida
 GCA_026023695.1_ASM2602369v1,164576,Chaenotheca gracillima,Spribille 41657/TS-e1856-1857(pooled),Ascomycota,,Coniocybomycetes,,Coniocybales,Coniocybaceae,Chaenotheca,Chaenotheca gracillima
 GCA_023628455.1_ASM2362845v1,2939515,Chaetomiaceae sp. B2702,B2702,Ascomycota,,Sordariomycetes,,Sordariales,Chaetomiaceae,,Chaetomiaceae sp. B2702
 GCA_023628475.1_ASM2362847v1,2939516,Chaetomiaceae sp. PF1801,PF1801,Ascomycota,,Sordariomycetes,,Sordariales,Chaetomiaceae,,Chaetomiaceae sp. PF1801
@@ -1278,7 +1278,7 @@ GCA_023628855.1_ASM2362885v1,2939518,Coniochaeta sp. PK30-01,PK30-01,Ascomycota,
 GCA_021432605.1_ConPMI546,1450552,Coniochaeta sp. PMI_546,PMI_546,Ascomycota,,Sordariomycetes,,Coniochaetales,Coniochaetaceae,Coniochaeta,Coniochaeta sp. PMI_546
 GCA_023628895.1_ASM2362889v1,2939519,Coniochaeta sp. PT30-03-2,PT30-03-2,Ascomycota,,Sordariomycetes,,Coniochaetales,Coniochaetaceae,Coniochaeta,Coniochaeta sp. PT30-03-2
 GCF_000271625.1_Conpu1,741705,Coniophora puteana RWD-64-598 SS2,RWD-64-598 SS2,Basidiomycota,,Agaricomycetes,,Boletales,Coniophoraceae,Coniophora,Coniophora puteana
-GCF_000281105.1_Coni_apol_CBS100218__V1,1168221,Coniosporium apollinis CBS 100218,CBS 100218,Ascomycota,,Dothideomycetes,,,,Coniosporium,Coniosporium apollinis
+GCF_000281105.1_Coni_apol_CBS100218_V1,1168221,Coniosporium apollinis CBS 100218,CBS 100218,Ascomycota,,Dothideomycetes,,,,Coniosporium,Coniosporium apollinis
 GCA_033119265.1_ASM3311926v1,93489,Coniosporium uncinatum,CCFEE 5737,Ascomycota,,Dothideomycetes,,,,Coniosporium,Coniosporium uncinatum
 GCA_025742365.1_Cglycines_Pg-43,1077358,Coniothyrium glycines,Pg-43,Ascomycota,,Dothideomycetes,,Pleosporales,Coniothyriaceae,Coniothyrium,Coniothyrium glycines
 GCA_032433595.1_UCR_Cluteorostrata_1.0,1105319,Conoideocrella luteorostrata,ARSEF 14590,Ascomycota,,Sordariomycetes,,Hypocreales,Clavicipitaceae,Conoideocrella,Conoideocrella luteorostrata
@@ -3034,7 +3034,7 @@ GCF_024244105.1_nmin_JUm1510,1912983,Nematocida minor,JUm1510,Microsporidia,,,,,
 GCF_000250985.1_Nema_parisii_ERTm1_V3,881290,Nematocida parisii ERTm1,ERTm1,Microsporidia,,,,,,Nematocida,Nematocida parisii
 GCA_024244115.1_ncid_AWRm77,2670344,Nematocida sp. AWRm77,AWRm77,Microsporidia,,,,,,Nematocida,Nematocida sp. AWRm77
 GCA_024244055.1_niro_AWRm78,2670341,Nematocida sp. AWRm78,AWRm78,Microsporidia,,,,,,Nematocida,Nematocida sp. AWRm78
-GCA_024243935.1_niro__AWRm79,2670342,Nematocida sp. AWRm79,AWRm79,Microsporidia,,,,,,Nematocida,Nematocida sp. AWRm79
+GCA_024243935.1_niro_AWRm79,2670342,Nematocida sp. AWRm79,AWRm79,Microsporidia,,,,,,Nematocida,Nematocida sp. AWRm79
 GCA_024244045.1_nokw_AWRm80,2670343,Nematocida sp. AWRm80,AWRm80,Microsporidia,,,,,,Nematocida,Nematocida sp. AWRm80
 GCA_001642415.1_ASM164241v1,1805481,Nematocida sp. ERTm5,ERTm5,Microsporidia,,,,,,Nematocida,Nematocida sp. ERTm5
 GCA_024244035.1_nfer_LUAm1,2670338,Nematocida sp. LUAm1,LUAm1,Microsporidia,,,,,,Nematocida,Nematocida sp. LUAm1
