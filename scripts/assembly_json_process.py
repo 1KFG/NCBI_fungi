@@ -32,10 +32,13 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"w",ne
         if category != 'representative genome':
             continue
 
-        accession = assembly['accession']
-        assembly_name= assembly['assembly_info']['assembly_name']
+        accession=assembly['accession']
+        assembly_name=assembly['assembly_info']['assembly_name']
+        # fix extra commas in name
+        assembly_name=assembly_name.replace(",","")
 
-        bioprojects = set(assembly['assembly_info']['bioproject_accession'])
+        bioprojects = set()
+        bioprojects.add(assembly['assembly_info']['bioproject_accession'])
         if args.verbose:
             print (assembly['assembly_info']['bioproject_lineage'])
         for p in assembly['assembly_info']['bioproject_lineage']:
@@ -55,11 +58,11 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"w",ne
         taxid   = assembly['organism']['tax_id']
         n50     = assembly['assembly_stats']['contig_n50']
         seqlength = assembly['assembly_stats']['total_sequence_length']
-        if species in rows:
-            if accession.startswith("GCF_"):
-                rows[species] = [accession,species,strain,taxid,";".join(bioprojects),seqlength,n50,assembly_name]
-        else:
-            rows[species] = [accession,species,strain,taxid,";".join(sorted(bioprojects)),seqlength,n50,assembly_name]
+        #if species in rows:
+        #    if accession.startswith("GCF_"):
+        rows[species] = [accession,species,strain,taxid,";".join(sorted(bioprojects)),seqlength,n50,assembly_name]
+        #else:
+        #    rows[species] = [accession,species,strain,taxid,";".join(sorted(bioprojects)),seqlength,n50,assembly_name]
         if args.verbose:
             print(rows[species])
     for species in sorted(rows.keys()):
