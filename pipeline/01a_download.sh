@@ -33,7 +33,7 @@ do
 	ONE=$(echo $ACCESSION | cut -d_ -f2 | awk '{print substr($1,1,3)}')
 	TWO=$(echo $ACCESSION | cut -d_ -f2 | awk '{print substr($1,4,3)}')
 	THREE=$(echo $ACCESSION | cut -d_ -f2 | awk '{print substr($1,7,3)}')
-	ASMNAME=$(echo $ASMNAME | perl -p -e 's/ /_/g; s/_+/_/;')
+	ASMNAME=$(echo $ASMNAME | perl -p -e 's/[, \/]+/_/g; s/_+/_/;')
 	echo "anonftp@ftp.ncbi.nlm.nih.gov:/genomes/all/$PRE/$ONE/$TWO/$THREE/${ACCESSION}_$ASMNAME/"
 	if [ ! -d $OUT/${ACCESSION}_$ASMNAME ]; then
 #		ascp -k1 -Tdr -l400M -i $ASPERAKEY --overwrite=diff anonftp@ftp.ncbi.nlm.nih.gov:/genomes/all/$PRE/$ONE/$TWO/$THREE/${ACCESSION}_$ASMNAME ./$OUT/
