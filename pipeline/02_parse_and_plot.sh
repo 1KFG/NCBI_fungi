@@ -1,5 +1,5 @@
 #!/usr/bin/bash -l
-#SBATCH -p short --mem 64gb -N 1 -n 64 --out logs/parse_genome_stats.log
+#SBATCH -p short --mem 64gb -N 1 -n 1 -c 64 --out logs/parse_genome_stats.log
 
 module load parallel
 module load biopython/1.70
