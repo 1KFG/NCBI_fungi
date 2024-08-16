@@ -13,7 +13,7 @@ def translator(s): return re.sub(r'[\s\-]', '_', s)
 
 
 parser = argparse.ArgumentParser(description='Extract Genome Stats from NCBI downloads to make plot table',
-                                 epilog="Generate input file by running perl scripts/make_taxonomy_table.pl > lin/ncbi_accessions_taxonomy.csv")
+                                 epilog="Generate input file by running perl scripts/make_taxonomy_table.pl > lib/ncbi_accessions_taxonomy.csv")
 parser.add_argument('--asmdir', default="source/NCBI_ASM",
                     help="Folder where NCBI assemblies were downloaded after running pipeline/01_download.sh")
 
