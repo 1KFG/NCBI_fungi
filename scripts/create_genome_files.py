@@ -14,7 +14,7 @@ cdsAttr = ['CDS', "cds_from_genomic.fna.gz", "cds.fasta"]
 proteinAttr = ['pep', "protein.faa.gz", "pep.fasta"]
 
 parser = argparse.ArgumentParser(description='Create genome assembly files named by species and strain',
-                                 epilog="Generate input file by running perl scripts/make_taxonomy_table.pl > lin/ncbi_accessions_taxonomy.csv")
+                                epilog="Generate input file by running perl scripts/make_taxonomy_table.pl > lin/ncbi_accessions_taxonomy.csv")
 parser.add_argument('--asmdir', default="source/NCBI_ASM",
                     help="Folder where NCBI assemblies were downloaded after running pipeline/01_download.sh")
 

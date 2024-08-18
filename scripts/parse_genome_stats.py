@@ -5,15 +5,16 @@
 import sys
 import csv
 import os
+import gzip
 import re, shutil
 import argparse
-#from BCBio import GFF
+from Bio import SeqIO
 import gffutils
 def translator(s): return re.sub(r'[\s\-]', '_', s)
 
 
 parser = argparse.ArgumentParser(description='Extract Genome Stats from NCBI downloads to make plot table',
-                                 epilog="Generate input file by running perl scripts/make_taxonomy_table.pl > lib/ncbi_accessions_taxonomy.csv")
+                                epilog="Generate input file by running perl scripts/make_taxonomy_table.pl > lib/ncbi_accessions_taxonomy.csv")
 parser.add_argument('--asmdir', default="source/NCBI_ASM",
                     help="Folder where NCBI assemblies were downloaded after running pipeline/01_download.sh")
 
@@ -35,6 +36,8 @@ args.index = int(args.index)
 asm_info = ["Date","Genome coverage", "Assembly method","Sequencing technology", "Assembly type", "Assembly level"]
 asm_stats = ["scaffold-N50", "scaffold-count", "total-length"]
 gene_stats = ["gene_count","gene_length_mean","exon_count","exon_length_mean","CDS_count","CDS_length_mean","intron_count","intron_length_mean"]
+# add a repeat stats calculation based on softmasked bases
+seq_stats = ["softmasked_percent","GC_percent"]
 
 revised_accessions = set()
 accessions = set()
@@ -47,6 +50,8 @@ header = next(csvin)
 header.extend([translator(s) for s in asm_info])
 header.extend([translator(s) for s in asm_stats])
 header.extend([translator(s) for s in gene_stats])
+header.extend([translator(s) for s in seq_stats])
+
 if not args.noheader:
     csvout.writerow(header)
 
@@ -71,16 +76,17 @@ for inrow in csvin:
     parse_stats = 0
     this_asm_stats = {}
     this_asm_info = {}
+    this_seq_stats = {}
     with open(statsfile,"rt",encoding="utf-8") as statsin:
         for line in statsin:
             if parse_stats:
                 row = line.split()
                 if ( row[0] == "all" and
-                     row[1] == "all" and
-                     row[2] == "all" and
-                     row[3] == "all" ):
-                      if row[4] in asm_stats:
-                          this_asm_stats[row[4]] = int(row[5])
+                    row[1] == "all" and
+                    row[2] == "all" and
+                    row[3] == "all" ):
+                    if row[4] in asm_stats:
+                        this_asm_stats[row[4]] = int(row[5])
             else:
                 if line.startswith("# unit-name	molecule-name"):
                     parse_stats = 1
@@ -126,12 +132,30 @@ for inrow in csvin:
 
         if this_gene_stats['gene_count'] > 0:
             this_gene_stats['gene_length_mean'] /= this_gene_stats['gene_count']
+            this_gene_stats['gene_length_mean'] = '%.2f'%(this_gene_stats['gene_length_mean'])
         if this_gene_stats['exon_count'] > 0:
             this_gene_stats['exon_length_mean'] /= this_gene_stats['exon_count']
+            this_gene_stats['exon_length_mean'] = '%.2f'%(this_gene_stats['exon_length_mean'])
         if this_gene_stats['CDS_count'] > 0:
             this_gene_stats['CDS_length_mean'] /= this_gene_stats['CDS_count']
+            this_gene_stats['CDS_length_mean'] = '%.2f'%(this_gene_stats['CDS_length_mean'])    
         if this_gene_stats['intron_count'] > 0:
             this_gene_stats['intron_length_mean'] /= this_gene_stats['intron_count']
+            this_gene_stats['intron_length_mean'] = '%.2f'%(this_gene_stats['intron_length_mean'])
+
+
+    fasta_file = os.path.join(folder,"{}_genomic.fna.gz".format(inrow[col2num["ASM_ACCESSION"]]))
+    if os.path.exists(fasta_file):
+        with gzip.open(fasta_file,'rt') as fhin:
+            lowercase = 0
+            total_length = 0
+            GC = 0
+            for record in SeqIO.parse(fhin,"fasta"):
+                total_length += len(record.seq)
+                lowercase += sum(record.seq.count(nt) for nt in ['a','c','g','t'])                
+                GC += sum(record.seq.count(nt) for nt in ['C','G','c','g'])  
+            this_seq_stats['softmasked_percent'] = '%.2f'%(100 * (lowercase / total_length))
+            this_seq_stats['GC_percent'] = '%.2f'%(100 * GC / total_length)
 
     for c in asm_info:
         if c in this_asm_info:
@@ -148,6 +172,12 @@ for inrow in csvin:
             inrow.append(this_gene_stats[c])
         else:
             inrow.append("")
+    for c in seq_stats:
+        if c in this_seq_stats:
+            inrow.append(this_seq_stats[c])
+        else:
+            inrow.append("")
+
 
     csvout.writerow(inrow)
     i += 1
