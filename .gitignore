@@ -3,15 +3,19 @@
 *~
 !README.md
 !TODO.md
+!CLAUDE.md
 !assembly_stat.csv
 !.gitignore
+!Makefile
+!pixi.toml
+!pixi.lock
 
 !lib
 !lib/*
 !logs
 !logs/.hodor
-!pipeline
-!pipeline/*
+!old-pipeline
+!old-pipeline/*
 !plots
 !plots/*
 !scripts

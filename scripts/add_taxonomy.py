@@ -18,10 +18,8 @@ parser = argparse.ArgumentParser(description="Add Taxonomy Columns to genome acc
                                  epilog="requires bin/taxonkit to be installed - see scripts/get_taxonkit.sh")
 parser.add_argument('--taxonkit',default='bin/taxonkit',help='taxonkit tool')
 parser.add_argument('--infile', dest='infile', default="lib/ncbi_accessions.csv",
-                    type=argparse.FileType('r'),
                     help='processed NCBI datasets file into simple accession set')
 parser.add_argument('--outfile',dest='outfile',default="lib/ncbi_accessions_taxonomy.csv",
-                    type=argparse.FileType('w'),
                     help="Output file for NCBI processing")
 parser.add_argument('--taxonkitdir',default="tmp/taxa",help="Directory for the taxonkit DB folder")
 parser.add_argument('--cpus','--cpu',default='4',help="number of CPUs to use")
@@ -30,7 +28,8 @@ parser.add_argument('-v','--verbose', default=False, action='store_true', help="
 parser.add_argument('--tmp', default="/scratch", help="Temp folder")
 args = parser.parse_args()
 
-csvin = csv.reader(args.infile, delimiter=",")
+infile = open(args.infile, 'r', newline='')
+csvin = csv.reader(infile, delimiter=",")
 header = next(csvin)
 
 # should be ACCESSION,SPECIES,STRAIN,NCBI_TAXID,BIOPROJECT,ASM_LENGTH,N50,ASM_NAME
@@ -53,9 +52,20 @@ for col in newheader:
 
 sumparse = re.compile(r'^\#\s+([^:]+):\s+(.+)')
 
+def sanitize_name(name):
+    """Replace characters unsafe in filenames and normalize biological name suffixes."""
+    name = name.strip()
+    name = re.sub(r'\s*\(nom\.\s*inval\.\)', '', name)
+    name = re.sub(r'\[([^\]]*)\]', r'_\1_', name)
+    name = re.sub(r'\(([^)]+)\)', r' \1 ', name)
+    name = re.sub(r'\s+', ' ', name).strip()
+    name = re.sub(r'[/\\|*?<>:\r\n]', '_', name)
+    name = re.sub(r'_+', '_', name)
+    return name.strip('_')
+
 i =0
 msg = ''
-csvout = csv.writer(args.outfile,delimiter=",")
+csvout = csv.writer(open(args.outfile, 'w', newline=''), delimiter=",", lineterminator='\n')
 csvout.writerow(newheader)
 msg = []
 rows = {}
@@ -63,14 +73,16 @@ for inrow in csvin:
     # want to save a subset of cols but we could always just make this a mashup of the two sets too
     # for simplicity, not sure the reasoning for this TBH
     acc = re.sub(r'\s+','_',inrow[col2num['ACCESSION']]+"_"+inrow[col2num['ASM_NAME']])
+    acc = sanitize_name(acc)
+    taxid = inrow[col2num["NCBI_TAXID"]].strip()
     row = [ acc,
-            inrow[col2num["NCBI_TAXID"]],
-            inrow[col2num["SPECIES"]],
-            inrow[col2num["STRAIN"]],
+            taxid,
+            sanitize_name(inrow[col2num["SPECIES"]]),
+            sanitize_name(inrow[col2num["STRAIN"]]),
     ]
     row.extend([""]*8)
-    rows[inrow[col2num["NCBI_TAXID"]]] = row
-    msg.append( inrow[col2num["NCBI_TAXID"]] )
+    rows[taxid] = row
+    msg.append(taxid)
 
 p = Popen([args.taxonkit,'--data-dir',args.taxonkitdir,'--threads',args.cpus,
            'reformat', '-I','1', '-P'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
@@ -81,16 +93,18 @@ if len(so) == 0:
 else:
     for str in so.decode().splitlines():
         taxrow = str.split("\t")
-        ncbi_id = taxrow[0]
-        lineagestr = taxrow[1]
+        ncbi_id = taxrow[0].strip()
+        lineagestr = taxrow[1].strip()
         if ncbi_id not in rows:
             print("cannot find {} in db of rows?".format(ncbi_id))
             continue
         else:
             row = rows[ncbi_id]
             for l in lineagestr.split(';'):
-                (rank,name) = l.split("__",2)
+                if "__" not in l:
+                    continue
+                (rank,name) = l.split("__",1)
                 if rank in rankToName:
                     colnum = newoutcol2num[rankToName[rank]]
-                    row[colnum] = name
+                    row[colnum] = sanitize_name(name)
             csvout.writerow(row)

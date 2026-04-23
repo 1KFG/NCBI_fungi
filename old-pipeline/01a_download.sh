@@ -2,6 +2,7 @@
 #SBATCH -p short --out logs/download.%a.log -a 1-12
 module load aspera
 DAT=lib/ncbi_accessions.csv
+DAT=lib/test.csv
 #ACCESSION,SPECIES,STRAIN,NCBI_TAXID,BIOPROJECT,N50,ASM_NAME
 OUT=source/NCBI_ASM
 N=${SLURM_ARRAY_TASK_ID}
@@ -14,8 +15,9 @@ if [ -z $N ]; then
 fi
 INTERVAL=500
 NSTART=$(perl -e "printf('%d',1 + $INTERVAL * ($N - 1))")
-NEND=$(perl -e "printf('%d',$INTERVAL * $N)")
+NEND=$(perl -e "print ($N * $INTERVAL) - 1")
 MAX=$(wc -l $DAT| awk '{print $1}')
+echo "$NSTART $NEND"
 if [ "$NSTART" -gt "$MAX" ]; then
 	echo "NSTART ($NSTART) > $MAX"
 	exit
