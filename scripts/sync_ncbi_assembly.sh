@@ -43,6 +43,19 @@ case "$METHOD" in
         ;;
 
     aria2c)
+        # Download a URL to dest_dir/filename; tries aria2c, falls back to curl.
+        ftp_get() {
+            local url=$1 dir=$2 file=$3
+            if aria2c --auto-file-renaming=false -x 2 -s 2 -c -q \
+                    --check-certificate=false \
+                    -d "$dir" -o "$file" "$url"; then
+                return 0
+            fi
+            echo "aria2c failed for $file, retrying with curl..." >&2
+            curl -fL --retry 3 --retry-delay 5 \
+                -o "${dir}/${file}" "$url"
+        }
+
         # Build the NCBI FTP path: genomes/all/{PRE}/{d1}/{d2}/{d3}/{ACCESSION}_{ASMNAME}/
         # The three path components come from the 9-digit numeric portion of the accession
         # (before the version dot), e.g. GCF_010015735.1 -> 010/015/735
@@ -55,11 +68,12 @@ case "$METHOD" in
         BASE_URL="https://ftp.ncbi.nih.gov/genomes/all/${PRE}/${ONE}/${TWO}/${THREE}/${ACCESSION}_${ASMNAME}"
 
         mkdir -p "$TARGET"
-
+	echo "target is $TARGET request is $BASE_URL/${ACCESSION}_${ASMNAME}_genomic.fna.gz"
         # Genome FASTA is required; fail and clean up if missing
-        if ! aria2c --auto-file-renaming=false -x 4 -s 4 -q \
-                -d "$TARGET" \
-                "${BASE_URL}/${ACCESSION}_${ASMNAME}_genomic.fna.gz"; then
+        if ! ftp_get \
+                "${BASE_URL}/${ACCESSION}_${ASMNAME}_genomic.fna.gz" \
+                "$TARGET" \
+                "${ACCESSION}_${ASMNAME}_genomic.fna.gz"; then
             rm -rf "$TARGET"
             echo "ERROR: failed to download genome for ${ACCESSION}" >&2
             exit 1
@@ -69,11 +83,13 @@ case "$METHOD" in
         for suffix in genomic.gff.gz \
                       protein.faa.gz \
                       cds_from_genomic.fna.gz \
-                      sequence_report.jsonl.gz \
+		      assembly_report.txt \
+                      sequence_report.jsonl \
                       assembly_stats.txt; do
-            aria2c --auto-file-renaming=false -x 4 -s 4 -q \
-                -d "$TARGET" \
-                "${BASE_URL}/${ACCESSION}_${ASMNAME}_${suffix}" 2>/dev/null || true
+            ftp_get \
+                "${BASE_URL}/${ACCESSION}_${ASMNAME}_${suffix}" \
+                "$TARGET" \
+                "${ACCESSION}_${ASMNAME}_${suffix}" 2>/dev/null || true
         done
         ;;
 

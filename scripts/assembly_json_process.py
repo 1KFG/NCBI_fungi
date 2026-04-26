@@ -51,6 +51,8 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"w",ne
         assembly_name=assembly['assembly_info']['assembly_name']
         # normalize whitespace / commas / slashes / underscores to single _
         assembly_name=re.sub(r'[\s,/_\\]+','_',assembly_name.strip())
+        assembly_name=re.sub(r'[()]+','_',assembly_name)
+        assembly_name=re.sub(r'_+','_',assembly_name).strip('_')
 
         bioprojects = set()
         bioprojects.add(assembly['assembly_info']['bioproject_accession'])
@@ -69,6 +71,7 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"w",ne
         elif 'isolate' in infra:
             strain = infra['isolate']
         strain = sanitize_name(re.sub(r',\s+', ';', strain))
+        strain = re.sub(r'\s*\(\s*$', '', strain).strip()
         taxid     = assembly['organism']['tax_id']
         n50       = assembly['assembly_stats']['scaffold_n50']
         seqlength = int(assembly['assembly_stats']['total_sequence_length'])
