@@ -58,7 +58,7 @@ def sanitize_name(name):
     name = re.sub(r'\s*\(nom\.\s*inval\.\)', '', name)
     name = re.sub(r'\[([^\]]*)\]', r'_\1_', name)
     name = re.sub(r'\(([^)]+)\)', r' \1 ', name)
-    name = re.sub(r'[\s;]+', ' ', name).strip()
+    name = re.sub(r'\s+', ' ', name).strip()
     name = re.sub(r'[/\\|*?<>:\r\n]', '_', name)
     name = re.sub(r'_+', '_', name)
     return name

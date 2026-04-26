@@ -9,7 +9,7 @@ def sanitize_name(name):
     name = re.sub(r'\[([^\]]*)\]', r'_\1_', name)
     name = re.sub(r'\(([^)]+)\)', r' \1 ', name)
     name = re.sub(r'\/','-', name)
-    name = re.sub(r'[\s;]+', ' ', name).strip()
+    name = re.sub(r'\s+', ' ', name).strip()
     name = re.sub(r'_+', '_', name)
     return name
 #.strip('_')
@@ -75,11 +75,12 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"w",ne
 
         row = [accession, species, strain, taxid,
                ";".join(sorted(bioprojects)), seqlength, n50, assembly_name]
-        # prefer GCF_ (RefSeq) over GCA_ when the same species has multiple assemblies
-        prev = rows.get(species)
+        # prefer GCF_ (RefSeq) over GCA_ when the same species+strain has multiple assemblies
+        key = (species, strain)
+        prev = rows.get(key)
         if prev is None or (accession.startswith("GCF_") and not prev[0].startswith("GCF_")):
-            rows[species] = row
+            rows[key] = row
         if args.verbose:
-            print(rows[species])
-    for species in sorted(rows.keys()):
-        outcsvtbl.writerow(rows[species])
+            print(rows[key])
+    for key in sorted(rows.keys()):
+        outcsvtbl.writerow(rows[key])
