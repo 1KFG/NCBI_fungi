@@ -42,7 +42,7 @@ The legacy numbered `*.sh` scripts under `old-pipeline/` are kept for reference 
 - `scripts/parse_genome_stats.py` — per-accession stats extractor; driven by `--index` (1-based row in `ncbi_accessions_taxonomy.csv`). `--headeronly` / `--noheader` let `parallel` stream rows into one CSV.
 - `scripts/create_genome_files.py` — materializes per-genome FASTA/GFF working directories.
 - `scripts/make_gff_db.py` — builds gffutils SQLite DB for a given row index.
-- `scripts/rsync_assembly.sh` — single-accession rsync helper used by `make download` (replaces the inline loop from the old `01a_download.sh`).
+- `scripts/sync_ncbi_assembly.sh` — single-accession download helper used by `make download`; supports `--method datasets` (default) or `--method aria2c` (fetches directly from NCBI FTP).
 - `scripts/summary_plot_genomeStats2.R`, `summary_plot_genomeStats.R`, `genome_feature_stats.R` — R plotting (project also has `NCBI_fungi.Rproj`). R is not in pixi.
 - `scripts/make_taxonomy_table.pl` — alternative Perl taxonomy builder referenced in `parse_genome_stats.py`'s help epilog.
 - `scripts/get_ncbi_datasets.sh`, `scripts/get_taxonkit.sh` — legacy binary fetchers; obsolete now that pixi provides `datasets`/`dataformat`/`taxonkit`. `get_taxonkit.sh` still contains the correct taxdump-download logic, which `make init` reproduces.
