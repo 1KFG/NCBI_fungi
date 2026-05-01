@@ -26,7 +26,7 @@ OUT=$3
 ASMNAME=$(echo "$ASMNAME" | perl -pe 's/[, \/]+/_/g; s/_+/_/;')
 TARGET="$OUT/${ACCESSION}_${ASMNAME}"
 
-if [ -d "$TARGET" ]; then
+if [[ -d "$TARGET" && -f "${TARGET}/${ACCESSION}_${ASMNAME}_assembly_stats.txt" ]]; then
     exit 0
 fi
 

@@ -68,7 +68,8 @@ msg = ''
 csvout = csv.writer(open(args.outfile, 'w', newline=''), delimiter=",", lineterminator='\n')
 csvout.writerow(newheader)
 msg = []
-rows = {}
+rows = {}        # accession -> row
+taxid_to_accs = {}  # taxid -> [accession, ...]
 for inrow in csvin:
     # want to save a subset of cols but we could always just make this a mashup of the two sets too
     # for simplicity, not sure the reasoning for this TBH
@@ -81,8 +82,11 @@ for inrow in csvin:
             sanitize_name(inrow[col2num["STRAIN"]]),
     ]
     row.extend([""]*8)
-    rows[taxid] = row
-    msg.append(taxid)
+    rows[acc] = row
+    if taxid not in taxid_to_accs:
+        taxid_to_accs[taxid] = []
+        msg.append(taxid)
+    taxid_to_accs[taxid].append(acc)
 
 p = Popen([args.taxonkit,'--data-dir',args.taxonkitdir,'--threads',args.cpus,
            'reformat', '-I','1', '-P'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
@@ -95,16 +99,19 @@ else:
         taxrow = str.split("\t")
         ncbi_id = taxrow[0].strip()
         lineagestr = taxrow[1].strip()
-        if ncbi_id not in rows:
+        if ncbi_id not in taxid_to_accs:
             print("cannot find {} in db of rows?".format(ncbi_id))
             continue
         else:
-            row = rows[ncbi_id]
+            taxcols = {}
             for l in lineagestr.split(';'):
                 if "__" not in l:
                     continue
                 (rank,name) = l.split("__",1)
                 if rank in rankToName:
-                    colnum = newoutcol2num[rankToName[rank]]
-                    row[colnum] = sanitize_name(name)
-            csvout.writerow(row)
+                    taxcols[newoutcol2num[rankToName[rank]]] = sanitize_name(name)
+            for acc in taxid_to_accs[ncbi_id]:
+                row = rows[acc]
+                for colnum, name in taxcols.items():
+                    row[colnum] = name
+                csvout.writerow(row)
