@@ -46,14 +46,15 @@ case "$METHOD" in
         # Download a URL to dest_dir/filename; tries aria2c, falls back to curl.
         ftp_get() {
             local url=$1 dir=$2 file=$3
-            if aria2c --auto-file-renaming=false -x 2 -s 2 -c -q \
-                    --check-certificate=false \
+	    if [ ! -f ${dir}/${file} ]; then
+              if aria2c --auto-file-renaming=false -x 2 -s 2 -c -q \
                     -d "$dir" -o "$file" "$url"; then
                 return 0
-            fi
-            echo "aria2c failed for $file, retrying with curl..." >&2
-            curl -fL --retry 3 --retry-delay 5 \
+              fi
+              echo "aria2c failed for $file, retrying with curl..." >&2
+              curl -k -fL --retry 3 --retry-delay 5 \
                 -o "${dir}/${file}" "$url"
+	    fi	
         }
 
         # Build the NCBI FTP path: genomes/all/{PRE}/{d1}/{d2}/{d3}/{ACCESSION}_{ASMNAME}/
@@ -66,6 +67,8 @@ case "$METHOD" in
         TWO=${NUM:3:3}
         THREE=${NUM:6:3}
         BASE_URL="https://ftp.ncbi.nih.gov/genomes/all/${PRE}/${ONE}/${TWO}/${THREE}/${ACCESSION}_${ASMNAME}"
+        #BASE_URL="https://130.14.250.107/genomes/all/${PRE}/${ONE}/${TWO}/${THREE}/${ACCESSION}_${ASMNAME}"
+
 
         mkdir -p "$TARGET"
 	echo "target is $TARGET request is $BASE_URL/${ACCESSION}_${ASMNAME}_genomic.fna.gz"

@@ -6,6 +6,7 @@ SHELL := /bin/bash
 .ONESHELL:
 
 CPU ?= 8
+DOWNLOAD_METHOD ?= datasets   # set to 'aria2c' to fetch directly from NCBI FTP
 
 TAXONKIT_DIR   := tmp/taxa
 ACCESSIONS_JSON := lib/ncbi_accessions.json
@@ -14,7 +15,7 @@ TAXONOMY_CSV    := lib/ncbi_accessions_taxonomy.csv
 ASM_DIR         := source/NCBI_ASM
 STATS_CSV       := assembly_stats.csv
 
-.PHONY: all help init download compress genomes stats gffdb clean \
+.PHONY: all help init download fix-names compress genomes stats gffdb clean \
         slurm-download slurm-compress slurm-stats slurm-gffdb slurm-genomes
 
 all: $(STATS_CSV)
@@ -23,6 +24,7 @@ help:
 	@echo "Targets:"
 	@echo "  init          fetch taxonkit taxdump database"
 	@echo "  download      rsync NCBI fungal assemblies into $(ASM_DIR)"
+	@echo "  fix-names     add dir-name prefix to unprefixed files; symlink '#'->'_' names"
 	@echo "  compress      bgzip all .fna and .gff and .faa files in $(ASM_DIR)"
 	@echo "  genomes       build per-genome working directories"
 	@echo "  stats         build $(STATS_CSV)"
@@ -61,17 +63,28 @@ $(TAXONOMY_CSV): $(ACCESSIONS_CSV) $(TAXONKIT_DIR)/nodes.dmp
 download: $(ACCESSIONS_CSV) $(TAXONOMY_CSV)
 	mkdir -p $(ASM_DIR)
 	tail -n +2 $(ACCESSIONS_CSV) \
-	  | parallel -j $(CPU) --colsep ',' scripts/rsync_assembly.sh {1} {8} $(ASM_DIR)
+	  | parallel -j $(CPU) --colsep ',' \
+	    scripts/sync_ncbi_assembly.sh --method $(DOWNLOAD_METHOD) {1} {8} $(ASM_DIR)
+
+# ---------------------------------------------------------------------------
+# Fix filenames after `datasets` download:
+#   1. Add directory-name prefix to unprefixed files (genomic.fna.gz, etc.)
+#   2. Create '#'->'_' symlinks for dirs/files with '#' in their names
+# ---------------------------------------------------------------------------
+fix-names: download
+	scripts/fix_asm_filenames.py $(ASM_DIR)
 
 # ---------------------------------------------------------------------------
 # Compress downloaded .fna files with bgzip (idempotent: skips *.fna.gz)
 # ---------------------------------------------------------------------------
-compress: download
+compress: fix-names
 	find $(ASM_DIR) -name '*.fna' ! -name '*.fna.gz' -type f -print0 \
 	  | parallel -j $(CPU) -0 bgzip -f {}
 	find $(ASM_DIR) -name '*.faa' ! -name '*.faa.gz' -type f -print0 \
 	  | parallel -j $(CPU) -0 bgzip -f {}
 	find $(ASM_DIR) -name '*.gff' ! -name '*.gff.gz' -type f -print0 \
+	  | parallel -j $(CPU) -0 pigz -f {}
+	find $(ASM_DIR) -name '*.jsonl' ! -name '*.jsonl.gz' -type f -print0 \
 	  | parallel -j $(CPU) -0 pigz -f {}
 
 
@@ -117,7 +130,7 @@ slurm-download:
 	mkdir -p logs
 	sbatch -p $(SLURM_PART) -N 1 -n 1 -c $(CPU) --mem 16gb \
 	    --out logs/make-download.%j.log -J download \
-	    --wrap "pixi run make download CPU=$(CPU)"
+	    --wrap "pixi run make download CPU=$(CPU) DOWNLOAD_METHOD=$(DOWNLOAD_METHOD)"
 
 slurm-stats:
 	mkdir -p logs
