@@ -46,9 +46,15 @@ init: $(TAXONKIT_DIR)/nodes.dmp
 # ---------------------------------------------------------------------------
 # Accession list -> flattened CSV -> taxonomy-joined CSV
 # ---------------------------------------------------------------------------
+# If the JSON already exists but is empty (0 bytes), delete it at parse time so
+# the rule re-runs -- Make compares timestamps only, not file size.
+$(if $(wildcard $(ACCESSIONS_JSON)),$(shell [ -s $(ACCESSIONS_JSON) ] || rm -f $(ACCESSIONS_JSON)))
+
 $(ACCESSIONS_JSON):
 	mkdir -p lib
-	datasets summary genome taxon fungi > $@
+	datasets summary genome taxon fungi > $@.tmp
+	if [ ! -s $@.tmp ]; then echo "ERROR: $@ download produced empty output" >&2; rm -f $@.tmp; exit 1; fi
+	mv $@.tmp $@
 
 $(ACCESSIONS_CSV): $(ACCESSIONS_JSON)
 	scripts/assembly_json_process.py --all-categories --infile $< --outfile $@
