@@ -33,11 +33,39 @@ OUT=$4
 # Local directory + filenames use the precomputed, filesystem-safe ASM_FOLDER.
 TARGET="$OUT/${ASMFOLDER}"
 
-# Skip if already downloaded. Files are bare (e.g. assembly_stats.txt) right after
-# a `datasets` download and only gain the ASM_FOLDER prefix once `make fix-names`
-# runs, so accept either form.
+# Normalize the files a `datasets` download drops into ${TARGET} to the canonical
+# ${ASMFOLDER}_${suffix} names downstream scripts expect. datasets emits the
+# genome FASTA already prefixed with NCBI's own assembly name and everything else
+# (gff/protein/cds/seq-report) bare, so rename all of them to OUR ASM_FOLDER
+# prefix. (This replaces the old standalone scripts/fix_asm_filenames.py pass.)
+normalize_filenames() {
+    local suffix src dst
+    # Bare files: exact name -> ASM_FOLDER-prefixed name.
+    for suffix in genomic.fna genomic.gff protein.faa cds_from_genomic.fna \
+                  sequence_report.jsonl assembly_stats.txt assembly_report.txt; do
+        src="${TARGET}/${suffix}"
+        dst="${TARGET}/${ASMFOLDER}_${suffix}"
+        [[ -e "$src" && ! -e "$dst" ]] && mv "$src" "$dst"
+    done
+    # Genome FASTA usually arrives as ${ACCESSION}_<ncbi-name>_genomic.fna; rename
+    # it to our prefix. Skip the cds file (it also ends in _genomic.fna) and skip
+    # if it is already canonical.
+    dst="${TARGET}/${ASMFOLDER}_genomic.fna"
+    if [[ ! -e "$dst" && ! -e "${dst}.gz" ]]; then
+        for src in "$TARGET"/*_genomic.fna; do
+            [[ -e "$src" ]] || continue
+            [[ "$src" == *cds_from_genomic.fna ]] && continue
+            [[ "$src" == "$dst" ]] && break
+            mv "$src" "$dst"
+            break
+        done
+    fi
+}
+
+# Skip if already downloaded -- the prefixed genome FASTA is the reliable marker
+# (present for both download methods, compressed or not).
 if [[ -d "$TARGET" ]] && \
-   { [[ -f "${TARGET}/${ASMFOLDER}_assembly_stats.txt" ]] || [[ -f "${TARGET}/assembly_stats.txt" ]]; }; then
+   { [[ -e "${TARGET}/${ASMFOLDER}_genomic.fna" ]] || [[ -e "${TARGET}/${ASMFOLDER}_genomic.fna.gz" ]]; }; then
     exit 0
 fi
 
@@ -51,6 +79,7 @@ case "$METHOD" in
         unzip -q "${TMPDIR}/download.zip" -d "$TMPDIR"
         mkdir -p "$TARGET"
         mv "${TMPDIR}/ncbi_dataset/data/${ACCESSION}/"* "$TARGET/"
+        normalize_filenames
         ;;
 
     aria2c)

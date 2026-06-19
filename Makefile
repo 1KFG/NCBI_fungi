@@ -15,7 +15,7 @@ TAXONOMY_CSV    := lib/ncbi_accessions_taxonomy.csv
 ASM_DIR         := source/NCBI_ASM
 STATS_CSV       := assembly_stats.csv
 
-.PHONY: all help init download fix-names compress genomes stats gffdb clean \
+.PHONY: all help init download compress genomes stats gffdb clean \
         detect-stale clean-stale \
         slurm-download slurm-compress slurm-stats slurm-gffdb slurm-genomes
 
@@ -25,7 +25,6 @@ help:
 	@echo "Targets:"
 	@echo "  init          fetch taxonkit taxdump database"
 	@echo "  download      rsync NCBI fungal assemblies into $(ASM_DIR)"
-	@echo "  fix-names     add dir-name prefix to unprefixed files from 'datasets' downloads"
 	@echo "  compress      bgzip all .fna and .gff and .faa files in $(ASM_DIR)"
 	@echo "  genomes       build per-genome working directories"
 	@echo "  stats         build $(STATS_CSV)"
@@ -76,17 +75,11 @@ download: $(ACCESSIONS_CSV) $(TAXONOMY_CSV)
 	    scripts/sync_ncbi_assembly.sh --method $(DOWNLOAD_METHOD) {1} {8} {9} $(ASM_DIR)
 
 # ---------------------------------------------------------------------------
-# Fix filenames after `datasets` download:
-#   1. Add directory-name prefix to unprefixed files (genomic.fna.gz, etc.)
-#   2. Create '#'->'_' symlinks for dirs/files with '#' in their names
-# ---------------------------------------------------------------------------
-fix-names: download
-	scripts/fix_asm_filenames.py $(ASM_DIR)
-
-# ---------------------------------------------------------------------------
 # Compress downloaded .fna files with bgzip (idempotent: skips *.fna.gz)
+# Filenames are normalized to the ${ASM_FOLDER}_ prefix during `make download`
+# (scripts/sync_ncbi_assembly.sh), so no separate fix-names pass is needed.
 # ---------------------------------------------------------------------------
-compress: fix-names
+compress: download
 	find $(ASM_DIR) -name '*.fna' ! -name '*.fna.gz' -type f -print0 \
 	  | parallel -j $(CPU) -0 bgzip -f {}
 	find $(ASM_DIR) -name '*.faa' ! -name '*.faa.gz' -type f -print0 \
