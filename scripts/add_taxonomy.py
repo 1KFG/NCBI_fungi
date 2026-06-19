@@ -76,8 +76,14 @@ taxid_to_accs = {}  # taxid -> [accession, ...]
 for inrow in csvin:
     # want to save a subset of cols but we could always just make this a mashup of the two sets too
     # for simplicity, not sure the reasoning for this TBH
-    acc = re.sub(r'\s+','_',inrow[col2num['ACCESSION']]+"_"+inrow[col2num['ASM_NAME']])
-    acc = sanitize_name(acc)
+    # ASM_FOLDER is the canonical filesystem-safe folder name produced once by
+    # assembly_json_process.sanitize_folder_name(); carry it through verbatim as
+    # ASM_ACCESSION so every script resolves the same on-disk path. Fall back to
+    # ACCESSION_ASM_NAME for older CSVs that predate the ASM_FOLDER column.
+    if 'ASM_FOLDER' in col2num:
+        acc = inrow[col2num['ASM_FOLDER']]
+    else:
+        acc = sanitize_name(re.sub(r'\s+','_',inrow[col2num['ACCESSION']]+"_"+inrow[col2num['ASM_NAME']]))
     taxid = inrow[col2num["NCBI_TAXID"]].strip()
     row = [ acc,
             taxid,

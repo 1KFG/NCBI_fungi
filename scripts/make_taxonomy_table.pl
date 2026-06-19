@@ -43,10 +43,18 @@ open( my $fh => $accin )
 my $header = <$fh>;
 while (<$fh>) {
     chomp;
-    my ( $acc, $species, $strain, $ncbi_taxid, $bioproject, $asmlen, $n50, $asm_name ) =
+    my ( $acc, $species, $strain, $ncbi_taxid, $bioproject, $asmlen, $n50, $asm_name, $asm_folder ) =
       split( /,/, $_ );
-    $asm_name =~ s/ /_/g;
-    my $asmacc = join( "_", $acc, $asm_name );
+    # Prefer the canonical filesystem-safe ASM_FOLDER column (from
+    # assembly_json_process.sanitize_folder_name); fall back for older CSVs.
+    my $asmacc;
+    if ( defined $asm_folder && length $asm_folder ) {
+        $asmacc = $asm_folder;
+    }
+    else {
+        ( my $clean = $asm_name ) =~ s/ /_/g;
+        $asmacc = join( "_", $acc, $clean );
+    }
     my $str    = "";
     if ( exists $lookup{$ncbi_taxid} ) {
         $str = $lookup{$ncbi_taxid};

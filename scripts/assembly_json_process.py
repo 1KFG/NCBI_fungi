@@ -2,6 +2,23 @@
 import json, csv,sys, re
 import argparse
 import hashlib
+def sanitize_folder_name(name):
+    """Canonical filesystem-safe assembly folder name.
+
+    This is the SINGLE source of truth for turning an ``${ACCESSION}_${ASM_NAME}``
+    string into the on-disk directory name. Anything outside [A-Za-z0-9._-] (most
+    importantly '#', but also spaces, commas, slashes, parens, etc.) becomes '_';
+    runs of '_' are collapsed and leading/trailing '_' trimmed. '.' and '-' are
+    kept because they are filesystem-safe and appear in real accessions/asm names
+    (e.g. GCA_026170115.1, HCTi.v1.0). Downstream paths are built from this value
+    (carried as the ASM_FOLDER column and copied into ASM_ACCESSION by
+    add_taxonomy.py), so changing the rule here changes it everywhere.
+    """
+    name = re.sub(r'[^A-Za-z0-9._-]+', '_', name)
+    name = re.sub(r'_+', '_', name).strip('_')
+    return name
+
+
 def sanitize_name(name):
     """Normalize biological names: remove nomenclatural suffixes, replace brackets/parens with underscores."""
     name = name.strip()
@@ -33,7 +50,7 @@ args = parser.parse_args()
 with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"w",newline='') as outcsv:
     data = json.load(jsonin)
     outcsvtbl = csv.writer(outcsv,dialect="unix",quoting=csv.QUOTE_MINIMAL)
-    outcsvtbl.writerow(['ACCESSION','SPECIES','STRAIN','NCBI_TAXID','BIOPROJECT','ASM_LENGTH','N50','ASM_NAME'])
+    outcsvtbl.writerow(['ACCESSION','SPECIES','STRAIN','NCBI_TAXID','BIOPROJECT','ASM_LENGTH','N50','ASM_NAME','ASM_FOLDER'])
     rows = {}
 
     for assembly in data['reports']:
@@ -76,8 +93,11 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"w",ne
         n50       = assembly['assembly_stats']['scaffold_n50']
         seqlength = int(assembly['assembly_stats']['total_sequence_length'])
 
+        # ASM_NAME keeps NCBI's (lightly normalized) name; ASM_FOLDER is the
+        # filesystem-safe directory name used for every on-disk path.
+        asm_folder = sanitize_folder_name("{}_{}".format(accession, assembly_name))
         row = [accession, species, strain, taxid,
-               ";".join(sorted(bioprojects)), seqlength, n50, assembly_name]
+               ";".join(sorted(bioprojects)), seqlength, n50, assembly_name, asm_folder]
         # prefer GCF_ (RefSeq) over GCA_ when the same species+strain has multiple assemblies
         key = (species, strain)
         prev = rows.get(key)

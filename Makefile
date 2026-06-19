@@ -16,6 +16,7 @@ ASM_DIR         := source/NCBI_ASM
 STATS_CSV       := assembly_stats.csv
 
 .PHONY: all help init download fix-names compress genomes stats gffdb clean \
+        detect-stale clean-stale \
         slurm-download slurm-compress slurm-stats slurm-gffdb slurm-genomes
 
 all: $(STATS_CSV)
@@ -24,11 +25,13 @@ help:
 	@echo "Targets:"
 	@echo "  init          fetch taxonkit taxdump database"
 	@echo "  download      rsync NCBI fungal assemblies into $(ASM_DIR)"
-	@echo "  fix-names     add dir-name prefix to unprefixed files; symlink '#'->'_' names"
+	@echo "  fix-names     add dir-name prefix to unprefixed files from 'datasets' downloads"
 	@echo "  compress      bgzip all .fna and .gff and .faa files in $(ASM_DIR)"
 	@echo "  genomes       build per-genome working directories"
 	@echo "  stats         build $(STATS_CSV)"
 	@echo "  gffdb         build gffutils SQLite databases"
+	@echo "  detect-stale  list $(ASM_DIR) folders no longer in $(ACCESSIONS_CSV)"
+	@echo "  clean-stale   delete those stale assembly folders"
 	@echo "  slurm-<tgt>   submit <tgt> as a SLURM job"
 	@echo ""
 	@echo "Override CPU with e.g. 'make stats CPU=32'"
@@ -70,7 +73,7 @@ download: $(ACCESSIONS_CSV) $(TAXONOMY_CSV)
 	mkdir -p $(ASM_DIR)
 	tail -n +2 $(ACCESSIONS_CSV) \
 	  | parallel -j $(CPU) --colsep ',' \
-	    scripts/sync_ncbi_assembly.sh --method $(DOWNLOAD_METHOD) {1} {8} $(ASM_DIR)
+	    scripts/sync_ncbi_assembly.sh --method $(DOWNLOAD_METHOD) {1} {8} {9} $(ASM_DIR)
 
 # ---------------------------------------------------------------------------
 # Fix filenames after `datasets` download:
@@ -155,6 +158,17 @@ slurm-genomes:
 	sbatch -p $(SLURM_PART) -N 1 -n 1 -c $(CPU) --mem 24gb \
 	    --out logs/make-genomes.%j.log \
 	    --wrap "pixi run make genomes CPU=$(CPU)"
+
+# ---------------------------------------------------------------------------
+# Detect / remove downloaded assembly folders no longer in the accession list
+# (e.g. assemblies suppressed or superseded by a new version at NCBI).
+# detect-stale is a dry run; clean-stale actually deletes.
+# ---------------------------------------------------------------------------
+detect-stale: $(ACCESSIONS_CSV)
+	scripts/detect_stale_assemblies.py --infile $(ACCESSIONS_CSV) --asmdir $(ASM_DIR)
+
+clean-stale: $(ACCESSIONS_CSV)
+	scripts/detect_stale_assemblies.py --infile $(ACCESSIONS_CSV) --asmdir $(ASM_DIR) --delete
 
 clean:
 	rm -f $(STATS_CSV)

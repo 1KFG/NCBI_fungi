@@ -3149,7 +3149,7 @@ GCA_024363405.1_ASM2436340v1,62690,Blumeria graminis f. sp. tritici,Bgt_Wtn1,Asc
 GCA_927323605.2_Bgt_ISR7_1,62690,Blumeria graminis f. sp. tritici,ISR_7,Ascomycota,,Leotiomycetes,,Erysiphales,Erysiphaceae,Blumeria,Blumeria graminis
 GCA_000417865.1_Bgt_94202_1,1306135,Blumeria graminis f. sp. tritici 94202,94202,Ascomycota,,Leotiomycetes,,Erysiphales,Erysiphaceae,Blumeria,Blumeria graminis
 GCA_000418435.1_Bgt_454_newbler_assembly,1268274,Blumeria graminis f. sp. tritici 96224,96224,Ascomycota,,Leotiomycetes,,Erysiphales,Erysiphaceae,Blumeria,Blumeria graminis
-GCA_000441875.1_Bgt_#70_1,1307830,Blumeria graminis f. sp. tritici Bgt#70,Bgt#70,Ascomycota,,Leotiomycetes,,Erysiphales,Erysiphaceae,Blumeria,Blumeria graminis
+GCA_000441875.1_Bgt_70_1,1307830,Blumeria graminis f. sp. tritici Bgt#70,Bgt#70,Ascomycota,,Leotiomycetes,,Erysiphales,Erysiphaceae,Blumeria,Blumeria graminis
 GCA_000417025.1_ASM41702v1,1306134,Blumeria graminis f. sp. tritici JIW2,JIW2,Ascomycota,,Leotiomycetes,,Erysiphales,Erysiphaceae,Blumeria,Blumeria graminis
 GCA_900237765.1_BghRACE1_v1,2867405,Blumeria hordei,RACE1,Ascomycota,,Leotiomycetes,,Erysiphales,Erysiphaceae,Blumeria,Blumeria hordei
 GCA_000401675.1_A6_trimmed_clc_assembly_flt.fa,1283758,Blumeria hordei A6,A6,Ascomycota,,Leotiomycetes,,Erysiphales,Erysiphaceae,Blumeria,Blumeria hordei
@@ -17174,9 +17174,9 @@ GCA_052858265.1_ASM5285826v1,318829,Pyricularia oryzae,R01-1,Ascomycota,,Sordari
 GCA_055472575.1_ASM5547257v1,318829,Pyricularia oryzae,RB22,Ascomycota,,Sordariomycetes,,Magnaporthales,Pyriculariaceae,Pyricularia,Pyricularia oryzae
 GCA_001853415.3_ASM185341v3,318829,Pyricularia oryzae,RMg-Dl,Ascomycota,,Sordariomycetes,,Magnaporthales,Pyriculariaceae,Pyricularia,Pyricularia oryzae
 GCA_031211395.1_ASM3121139v1,318829,Pyricularia oryzae,RN1,Ascomycota,,Sordariomycetes,,Magnaporthales,Pyriculariaceae,Pyricularia,Pyricularia oryzae
-GCA_026170125.1_Rep1-bas4#11,318829,Pyricularia oryzae,Rep1-bas4#11,Ascomycota,,Sordariomycetes,,Magnaporthales,Pyriculariaceae,Pyricularia,Pyricularia oryzae
-GCA_026170135.1_Rep1-bas4#2,318829,Pyricularia oryzae,Rep1-bas4#2,Ascomycota,,Sordariomycetes,,Magnaporthales,Pyriculariaceae,Pyricularia,Pyricularia oryzae
-GCA_026170115.1_Rep1-bas4#3,318829,Pyricularia oryzae,Rep1-bas4#3,Ascomycota,,Sordariomycetes,,Magnaporthales,Pyriculariaceae,Pyricularia,Pyricularia oryzae
+GCA_026170125.1_Rep1-bas4_11,318829,Pyricularia oryzae,Rep1-bas4#11,Ascomycota,,Sordariomycetes,,Magnaporthales,Pyriculariaceae,Pyricularia,Pyricularia oryzae
+GCA_026170135.1_Rep1-bas4_2,318829,Pyricularia oryzae,Rep1-bas4#2,Ascomycota,,Sordariomycetes,,Magnaporthales,Pyriculariaceae,Pyricularia,Pyricularia oryzae
+GCA_026170115.1_Rep1-bas4_3,318829,Pyricularia oryzae,Rep1-bas4#3,Ascomycota,,Sordariomycetes,,Magnaporthales,Pyriculariaceae,Pyricularia,Pyricularia oryzae
 GCA_025473295.1_ASM2547329v1,318829,Pyricularia oryzae,Rep1-buf1#10,Ascomycota,,Sordariomycetes,,Magnaporthales,Pyriculariaceae,Pyricularia,Pyricularia oryzae
 GCA_025473575.1_ASM2547357v1,318829,Pyricularia oryzae,Rep1-buf1#2,Ascomycota,,Sordariomycetes,,Magnaporthales,Pyriculariaceae,Pyricularia,Pyricularia oryzae
 GCA_025473445.1_ASM2547344v1,318829,Pyricularia oryzae,Rep1-buf1#4,Ascomycota,,Sordariomycetes,,Magnaporthales,Pyriculariaceae,Pyricularia,Pyricularia oryzae

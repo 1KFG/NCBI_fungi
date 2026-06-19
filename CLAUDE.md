@@ -20,7 +20,7 @@ Run in order; each depends on the previous via Make dependencies:
 1. `make init` — fetches the NCBI taxdump into `tmp/taxa/` (taxonkit binary itself comes from pixi).
 2. `make lib/ncbi_accessions.csv` — runs `datasets summary genome taxon fungi` → `lib/ncbi_accessions.json`, then `scripts/assembly_json_process.py` flattens it.
 3. `make lib/ncbi_accessions_taxonomy.csv` — `scripts/add_taxonomy.py` joins taxonomy via `taxonkit`.
-4. `make download` — fans `scripts/rsync_assembly.sh` over rows of `lib/ncbi_accessions.csv` with GNU parallel (expects columns: ACCESSION,SPECIES,STRAIN,NCBI_TAXID,BIOPROJECT,ASM_LENGTH,N50,ASM_NAME; uses `{1}` and `{8}`).
+4. `make download` — fans `scripts/sync_ncbi_assembly.sh` over rows of `lib/ncbi_accessions.csv` with GNU parallel (columns: ACCESSION,SPECIES,STRAIN,NCBI_TAXID,BIOPROJECT,ASM_LENGTH,N50,ASM_NAME,ASM_FOLDER; uses `{1}` ACCESSION, `{8}` ASM_NAME, `{9}` ASM_FOLDER). `make detect-stale` / `make clean-stale` report / remove `source/NCBI_ASM` folders whose accession is no longer in the CSV (NCBI-suppressed or superseded).
 5. `make genomes` — `scripts/create_genome_files.py --index N` over all rows.
 6. `make stats` → `assembly_stats.csv` — header once via `--headeronly`, then parallel `parse_genome_stats.py --noheader --index N` rows appended.
 7. `make gffdb` — `scripts/make_gff_db.py -n N` over all rows.
@@ -42,7 +42,8 @@ The legacy numbered `*.sh` scripts under `old-pipeline/` are kept for reference 
 - `scripts/parse_genome_stats.py` — per-accession stats extractor; driven by `--index` (1-based row in `ncbi_accessions_taxonomy.csv`). `--headeronly` / `--noheader` let `parallel` stream rows into one CSV.
 - `scripts/create_genome_files.py` — materializes per-genome FASTA/GFF working directories.
 - `scripts/make_gff_db.py` — builds gffutils SQLite DB for a given row index.
-- `scripts/sync_ncbi_assembly.sh` — single-accession download helper used by `make download`; supports `--method datasets` (default) or `--method aria2c` (fetches directly from NCBI FTP).
+- `scripts/sync_ncbi_assembly.sh` — single-accession download helper used by `make download`; args `<ACCESSION> <ASM_NAME> <ASM_FOLDER> <OUT_DIR>`. Supports `--method datasets` (default, downloads by accession) or `--method aria2c` (fetches directly from NCBI FTP using raw `ASM_NAME` for the remote path, `ASM_FOLDER` for local names).
+- `scripts/detect_stale_assemblies.py` — reports (`make detect-stale`) or deletes (`make clean-stale`) `source/NCBI_ASM` folders whose accession is absent from `lib/ncbi_accessions.csv`; keys on the accession prefix, so it's immune to asm-name sanitization drift.
 - `scripts/summary_plot_genomeStats2.R`, `summary_plot_genomeStats.R`, `genome_feature_stats.R` — R plotting (project also has `NCBI_fungi.Rproj`). R is not in pixi.
 - `scripts/make_taxonomy_table.pl` — alternative Perl taxonomy builder referenced in `parse_genome_stats.py`'s help epilog.
 - `scripts/get_ncbi_datasets.sh`, `scripts/get_taxonkit.sh` — legacy binary fetchers; obsolete now that pixi provides `datasets`/`dataformat`/`taxonkit`. `get_taxonkit.sh` still contains the correct taxdump-download logic, which `make init` reproduces.
@@ -50,5 +51,5 @@ The legacy numbered `*.sh` scripts under `old-pipeline/` are kept for reference 
 ## Conventions
 
 - Input CSV rows are addressed by 1-based line index passed as `--index` / `-n`. The Makefile drives parallelism with `parallel -j $(CPU)` over `seq 1 $MAX` — there is no more `INTERVAL`-based sharding.
-- Accession folder names are `${ACCESSION}_${ASMNAME}` with `ASMNAME` sanitized via `s/[, \/]+/_/g; s/_+/_/;` (implemented in `scripts/rsync_assembly.sh`).
+- Accession folder names are the `ASM_FOLDER` column = `sanitize_folder_name("${ACCESSION}_${ASM_NAME}")`, the single source of truth in `scripts/assembly_json_process.py` (anything outside `[A-Za-z0-9._-]`, e.g. `#`, → `_`). `add_taxonomy.py` copies `ASM_FOLDER` verbatim into the `ASM_ACCESSION` column that the stats/genomes/gffdb scripts use to resolve paths. `ASM_NAME` stays NCBI's name (used only to build the aria2c FTP URL). Because folders are filesystem-safe at creation, `fix-names` no longer makes `#`→`_` symlinks; it only adds the dir-name prefix to bare `datasets` files.
 - `pixi run make <target>` is the canonical way to invoke any step; avoid re-introducing `module load` or `conda activate` in new scripts.
