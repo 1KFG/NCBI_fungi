@@ -162,33 +162,26 @@ def main():
     color_genus = "#fdae61"
     color_multi = "#1a9641"
 
-    ax = axes[0, 0]
-    ax.plot(month_dates, cum_orders, color=color_order, linewidth=1.5)
-    ax.fill_between(month_dates, cum_orders, alpha=0.15, color=color_order)
-    ax.set_ylabel("Cumulative orders")
-    ax.set_title("Orders")
-    ax.grid(True, alpha=0.3)
+    panels = [
+        (axes[0, 0], cum_orders, "Cumulative orders", "Orders", color_order),
+        (axes[0, 1], cum_families, "Cumulative families", "Families", color_family),
+        (axes[1, 0], cum_genera, "Cumulative genera", "Genera", color_genus),
+        (axes[1, 1], cum_multistrain, "Species count",
+         "Species with multiple strains", color_multi),
+    ]
 
-    ax = axes[0, 1]
-    ax.plot(month_dates, cum_families, color=color_family, linewidth=1.5)
-    ax.fill_between(month_dates, cum_families, alpha=0.15, color=color_family)
-    ax.set_ylabel("Cumulative families")
-    ax.set_title("Families")
-    ax.grid(True, alpha=0.3)
+    for ax, ydata, ylabel, title, color in panels:
+        ax.plot(month_dates, ydata, color=color, linewidth=1.5)
+        ax.fill_between(month_dates, ydata, alpha=0.15, color=color)
+        ax.set_ylabel(ylabel, color=color)
+        ax.set_title(title)
+        ax.grid(True, alpha=0.3)
 
-    ax = axes[1, 0]
-    ax.plot(month_dates, cum_genera, color=color_genus, linewidth=1.5)
-    ax.fill_between(month_dates, cum_genera, alpha=0.15, color=color_genus)
-    ax.set_ylabel("Cumulative genera")
-    ax.set_title("Genera")
-    ax.grid(True, alpha=0.3)
-
-    ax = axes[1, 1]
-    ax.plot(month_dates, cum_multistrain, color=color_multi, linewidth=1.5)
-    ax.fill_between(month_dates, cum_multistrain, alpha=0.15, color=color_multi)
-    ax.set_ylabel("Species count")
-    ax.set_title("Species with multiple strains")
-    ax.grid(True, alpha=0.3)
+        ax2 = ax.twinx()
+        ax2.plot(month_dates, cum_assemblies, color="black", linewidth=1,
+                 linestyle="-", alpha=0.7)
+        ax2.set_ylabel("Cumulative assemblies", color="black", fontsize=8)
+        ax2.tick_params(axis="y", labelsize=7, colors="black")
 
     for ax in axes.flat:
         ax.xaxis.set_major_locator(mdates.YearLocator(2))
