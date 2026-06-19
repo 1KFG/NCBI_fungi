@@ -20,12 +20,16 @@ def sanitize_folder_name(name):
 
 
 def sanitize_name(name):
-    """Normalize biological names: remove nomenclatural suffixes, replace brackets/parens with underscores."""
+    """Normalize biological names: remove nomenclatural suffixes, replace brackets/parens with underscores, and replace commas with underscores."""
     name = name.strip()
     name = re.sub(r'\s*\(nom\.\s*inval\.\)', '', name)
     name = re.sub(r'\[([^\]]*)\]', r'_\1_', name)
     name = re.sub(r'\(([^)]+)\)', r' \1 ', name)
     name = re.sub(r'\/','-', name)
+    # replace any remaining commas (e.g. "CRUB 1588,7") so they don't end up
+    # quoted in the output CSV; ", " between multiple strains is converted to
+    # ";" before this is called.
+    name = re.sub(r',', '_', name)
     name = re.sub(r'\s+', ' ', name).strip()
     name = re.sub(r'_+', '_', name)
     return name
