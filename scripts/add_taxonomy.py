@@ -56,7 +56,10 @@ def sanitize_name(name):
     """Replace characters unsafe in filenames and normalize biological name suffixes."""
     name = name.strip()
     name = re.sub(r'\s*\(nom\.\s*inval\.\)', '', name)
-    name = re.sub(r'\[([^\]]*)\]', r'_\1_', name)
+    # Unwrap NCBI's uncertain-placement brackets, e.g. "[Candida] argentea" -> "Candida argentea".
+    # Only a single whitespace-free token inside the brackets is treated this way (a misapplied
+    # genus name); brackets containing spaces fall through to the filename-safety substitution below.
+    name = re.sub(r'\[([^\[\]\s]+)\]', r' \1 ', name)
     name = re.sub(r'\(([^)]+)\)', r' \1 ', name)
     name = re.sub(r'[/\\|*?<>:()\[\];\r\n]', '_', name)
     name = re.sub(r'\s+', ' ', name).strip()
