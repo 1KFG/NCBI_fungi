@@ -19,6 +19,41 @@ def sanitize_folder_name(name):
     return name
 
 
+# Sequence-file extensions and assembler/processing qualifiers that occasionally
+# leak into NCBI's assembly_name (e.g. "MyGenome.fasta", "MyGenome.final.scaffolds",
+# "MyGenome.nr.fa", "MyGenome.clean", "MyGenome.embl.gz"); stripped from both
+# ASM_NAME and the folder name so neither is named like a file. The qualifier
+# group repeats so chains like ".final.scaffolds" or ".contigs.clean" all go.
+_SEQ_EXT_RE = re.compile(
+    r'(?:\.(?:final|scaffolds|contigs|clean|CLC|nr))*'
+    r'(?:\.(?:fasta|fas|fsa|fna|ffn|frn|mfa|fa|seq|embl))?'
+    r'(?:\.(?:gz|bz2|zip|xz))?$',
+    re.IGNORECASE)
+
+
+def strip_seq_extension(name):
+    """Drop a trailing sequence-file extension or assembler/processing qualifier
+    (.fasta/.fna/.fa/.embl/..., .final.scaffolds, .contigs, .clean, .CLC, .nr,
+    optionally .gz-style compressed) from an assembly name."""
+    return _SEQ_EXT_RE.sub('', name)
+
+
+# After stripping, a legitimate trailing dotted suffix should look like an
+# assembly version: ".1" / ".10" (\.\d+) or ".v1.0" (\.v[\d.]+). Anything else
+# (e.g. ".spades", ".v2_final") is probably a new file extension we don't yet
+# strip, so warn so it can be added to _SEQ_EXT_RE.
+_VERSION_RE = re.compile(r'(?:\.\d+|\.v[\d.]+)$', re.IGNORECASE)
+
+
+def warn_if_unknown_extension(name, accession=""):
+    """Emit a stderr warning when ``name`` ends in a dotted suffix that isn't a
+    recognized version token, hinting that a new extension should be stripped."""
+    if re.search(r'\.[^.]+$', name) and not _VERSION_RE.search(name):
+        print("WARNING: {} assembly_name '{}' has an unrecognized trailing "
+              "extension (not .<digits> or .v<digits>); consider adding it to "
+              "_SEQ_EXT_RE".format(accession or '?', name), file=sys.stderr)
+
+
 def sanitize_name(name):
     """Normalize biological names: remove nomenclatural suffixes, replace brackets/parens with underscores, and replace commas with underscores."""
     name = name.strip()
@@ -74,6 +109,13 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"w",ne
         assembly_name=re.sub(r'[\s,/_\\]+','_',assembly_name.strip())
         assembly_name=re.sub(r'[()]+','_',assembly_name)
         assembly_name=re.sub(r'_+','_',assembly_name).strip('_')
+        # drop trailing sequence/assembler file extensions (e.g.
+        # ".final.scaffolds", ".fasta") from ASM_NAME itself, then warn (only
+        # with --verbose) if a non-version-like suffix remains (likely a new
+        # extension to strip)
+        assembly_name=strip_seq_extension(assembly_name)
+        if args.verbose:
+            warn_if_unknown_extension(assembly_name, accession)
 
         bioprojects = set()
         bioprojects.add(assembly['assembly_info']['bioproject_accession'])
@@ -98,8 +140,10 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"w",ne
         seqlength = int(assembly['assembly_stats']['total_sequence_length'])
 
         # ASM_NAME keeps NCBI's (lightly normalized) name; ASM_FOLDER is the
-        # filesystem-safe directory name used for every on-disk path.
-        asm_folder = sanitize_folder_name("{}_{}".format(accession, assembly_name))
+        # filesystem-safe directory name used for every on-disk path. Strip any
+        # trailing sequence-file extension so the folder isn't named like a file.
+        asm_folder = sanitize_folder_name(
+            "{}_{}".format(accession, strip_seq_extension(assembly_name)))
         row = [accession, species, strain, taxid,
                ";".join(sorted(bioprojects)), seqlength, n50, assembly_name, asm_folder]
         # prefer GCF_ (RefSeq) over GCA_ when the same species+strain has multiple assemblies

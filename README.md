@@ -119,6 +119,15 @@ the `lib/`, `logs/`, `old-pipeline/`, `plots/`, `scripts/` trees.
   of `_` are collapsed, and leading/trailing `_` trimmed. `.` and `-` are kept
   (they appear in real accessions/asm names). `ASM_NAME` keeps NCBI's name (used
   only to build the aria2c FTP URL).
+- **Sequence-file extensions in the asm name are stripped from `ASM_FOLDER`**
+  (`strip_seq_extension` in `assembly_json_process.py`). Some NCBI assembly
+  names leak a filename suffix (e.g. `MyGenome.fasta`, `assembly.fna.gz`); a
+  trailing `.fasta/.fas/.fsa/.fna/.ffn/.frn/.mfa/.fa/.seq` (case-insensitive,
+  with an optional `.gz/.bz2/.zip/.xz`) is removed before the folder is built,
+  so the directory isn't named like a file (`…_MyGenome`, not `…_MyGenome.fasta`).
+  Only the folder is cleaned — `ASM_NAME` keeps the raw value for the FTP URL —
+  and real dotted version strings are preserved (`HCTi.v1.0`, accession `.1`/`.2`
+  are not treated as extensions).
 - **Name sanitization** (`sanitize_name` in `assembly_json_process.py`) is the
   centralized rule for biological `SPECIES`/`STRAIN` strings: it strips
   nomenclatural suffixes, turns brackets/parens into underscores, and replaces
