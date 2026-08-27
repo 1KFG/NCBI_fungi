@@ -6,12 +6,17 @@ NCBI periodically suppresses an assembly or supersedes it with a new version, so
 a fresh ``datasets summary`` no longer lists the old accession -- but the old
 download still occupies disk under ``source/NCBI_ASM``. This finds those.
 
-Matching is done on the **accession**, not the full folder name. Folder names are
-``${ACCESSION}_${ASMFOLDER}`` but the trailing portion is a sanitized assembly
-name whose exact form has changed over time (and older downloads may differ from
-the current ASM_FOLDER). The accession (``GCA_########.v`` / ``GCF_########.v``)
-is the stable unique key and always prefixes the folder, so we key on that to
-avoid false positives. A folder is stale iff its accession is absent from the CSV.
+Matching is done on the **full sanitized folder name** (the ``ASM_FOLDER`` column,
+= ``sanitize_folder_name("${ACCESSION}_${ASM_NAME}")``). A folder is stale iff its
+name is not one of the current ``ASM_FOLDER`` values. This catches both:
+  * suppressed/superseded accessions (the accession, and thus its folder, is gone)
+  * folders whose sanitized name changed (e.g. a new asm-name-stripping rule
+    produces a different ASM_FOLDER, leaving the old-named download orphaned --
+    downstream scripts now look under the new name).
+
+The CSV column is auto-detected: ``ASM_FOLDER`` (lib/ncbi_accessions.csv) or
+``ASM_ACCESSION`` (lib/ncbi_accessions_taxonomy.csv, which copies ASM_FOLDER
+verbatim).
 
 By default this only *reports* stale folders. Pass --delete to remove them
 (symlinks are unlinked; real directories are removed recursively).
@@ -19,28 +24,24 @@ By default this only *reports* stale folders. Pass --delete to remove them
 import argparse
 import csv
 import os
-import re
 import shutil
 import sys
 from pathlib import Path
 
-ACCESSION_RE = re.compile(r"^(GC[AF]_[0-9]+\.[0-9]+)_")
+# CSV column holding the canonical sanitized folder name, in preference order.
+FOLDER_COLUMNS = ("ASM_FOLDER", "ASM_ACCESSION")
 
 
-def csv_accessions(csv_path):
-    """Return the set of accessions in the current accession CSV."""
-    accessions = set()
+def csv_folder_names(csv_path):
+    """Return the set of current sanitized folder names from the accession CSV."""
     with open(csv_path, newline="") as fh:
         reader = csv.DictReader(fh)
-        for row in reader:
-            accessions.add(row["ACCESSION"].strip())
-    return accessions
-
-
-def folder_accession(name):
-    """Extract the accession prefix from a folder name, or None if it doesn't parse."""
-    m = ACCESSION_RE.match(name)
-    return m.group(1) if m else None
+        col = next((c for c in FOLDER_COLUMNS if c in (reader.fieldnames or [])),
+                   None)
+        if col is None:
+            sys.exit(f"ERROR: {csv_path} has none of the expected folder-name "
+                     f"columns {FOLDER_COLUMNS}; header is {reader.fieldnames}")
+        return {row[col].strip() for row in reader}
 
 
 def main():
@@ -62,28 +63,16 @@ def main():
     if not asm_dir.is_dir():
         sys.exit(f"ERROR: assembly directory not found: {asm_dir}")
 
-    accessions = csv_accessions(csv_path)
+    valid = csv_folder_names(csv_path)
 
     folders = [d for d in sorted(asm_dir.iterdir())
                if d.is_dir() or d.is_symlink()]
 
-    stale = []
-    unparsed = []
-    for d in folders:
-        acc = folder_accession(d.name)
-        if acc is None:
-            unparsed.append(d)
-        elif acc not in accessions:
-            stale.append(d)
+    stale = [d for d in folders if d.name not in valid]
 
-    print(f"{len(accessions)} accessions in {csv_path}", file=sys.stderr)
+    print(f"{len(valid)} folder names in {csv_path}", file=sys.stderr)
     print(f"{len(folders)} folders in {asm_dir}", file=sys.stderr)
-    if unparsed:
-        print(f"{len(unparsed)} folder(s) with unrecognized names (skipped):",
-              file=sys.stderr)
-        for d in unparsed:
-            print(f"  ?\t{d}", file=sys.stderr)
-    print(f"{len(stale)} stale folder(s): accession no longer in {csv_path.name}",
+    print(f"{len(stale)} stale folder(s): name not in {csv_path.name}",
           file=sys.stderr)
 
     for d in stale:
