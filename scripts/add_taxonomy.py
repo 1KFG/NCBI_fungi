@@ -60,6 +60,11 @@ def sanitize_name(name):
     # Only a single whitespace-free token inside the brackets is treated this way (a misapplied
     # genus name); brackets containing spaces fall through to the filename-safety substitution below.
     name = re.sub(r'\[([^\[\]\s]+)\]', r' \1 ', name)
+    # ncbi_accessions.csv (produced by assembly_json_process.sanitize_name) has already
+    # rewritten those same brackets to "_Candida_" by the time this script sees them, so
+    # the bracket regex above never matches on that input; unwrap that form too, e.g.
+    # "_Lipomyces_ oligophaga" -> "Lipomyces oligophaga".
+    name = re.sub(r'(?:^|(?<=\s))_([^\s_]+)_(?=\s|$)', r' \1 ', name)
     name = re.sub(r'\(([^)]+)\)', r' \1 ', name)
     name = re.sub(r'[/\\|*?<>:()\[\];\r\n]', '_', name)
     name = re.sub(r'\s+', ' ', name).strip()
@@ -97,30 +102,79 @@ for inrow in csvin:
         msg.append(taxid)
     taxid_to_accs[taxid].append(acc)
 
-p = Popen([args.taxonkit,'--data-dir',args.taxonkitdir,'--threads',args.cpus,
-           'reformat', '-I','1', '-P'], stdout=PIPE, stdin=PIPE, stderr=PIPE)
-combined = "\n".join(msg)+"\n"
-(so,se) = p.communicate(input=combined.encode())
+def run_taxonkit(subargs, input_lines):
+    p = Popen([args.taxonkit,'--data-dir',args.taxonkitdir,'--threads',args.cpus]+subargs,
+              stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    combined = "\n".join(input_lines)+"\n"
+    (so,se) = p.communicate(input=combined.encode())
+    return so, se
+
+def parse_lineage(lineagestr):
+    taxcols = {}
+    for l in lineagestr.split(';'):
+        if "__" not in l:
+            continue
+        (rank,name) = l.split("__",1)
+        if rank in rankToName:
+            taxcols[newoutcol2num[rankToName[rank]]] = sanitize_name(name)
+    return taxcols
+
+so, se = run_taxonkit(['reformat', '-I','1', '-P'], msg)
+unresolved_taxids = []
 if len(so) == 0:
     print("error no result for {}, error is {}".format(msg,se))
 else:
     for str in so.decode().splitlines():
         taxrow = str.split("\t")
         ncbi_id = taxrow[0].strip()
-        lineagestr = taxrow[1].strip()
+        lineagestr = taxrow[1].strip() if len(taxrow) > 1 else ''
         if ncbi_id not in taxid_to_accs:
             print("cannot find {} in db of rows?".format(ncbi_id))
             continue
-        else:
-            taxcols = {}
-            for l in lineagestr.split(';'):
-                if "__" not in l:
-                    continue
-                (rank,name) = l.split("__",1)
-                if rank in rankToName:
-                    taxcols[newoutcol2num[rankToName[rank]]] = sanitize_name(name)
-            for acc in taxid_to_accs[ncbi_id]:
-                row = rows[acc]
-                for colnum, name in taxcols.items():
-                    row[colnum] = name
-                csvout.writerow(row)
+        taxcols = parse_lineage(lineagestr)
+        if not taxcols:
+            # taxid has no lineage (e.g. deleted/retired NCBI taxonomy node) -
+            # fall back to resolving the leading (genus/family/order) word of
+            # the submitted species name instead of leaving the row blank.
+            unresolved_taxids.append(ncbi_id)
+        for acc in taxid_to_accs[ncbi_id]:
+            row = rows[acc]
+            for colnum, name in taxcols.items():
+                row[colnum] = name
+
+if unresolved_taxids:
+    fallback_name_to_taxids = {}
+    for ncbi_id in unresolved_taxids:
+        acc = taxid_to_accs[ncbi_id][0]
+        species = rows[acc][newoutcol2num["SPECIES_IN"]]
+        fallback_name = species.split()[0] if species else ''
+        if not fallback_name:
+            continue
+        fallback_name_to_taxids.setdefault(fallback_name, []).append(ncbi_id)
+
+    so, se = run_taxonkit(['name2taxid'], list(fallback_name_to_taxids.keys()))
+    fallback_taxid_to_names = {}
+    for str in so.decode().splitlines():
+        cols = str.split("\t")
+        if len(cols) < 2 or not cols[1].strip():
+            continue
+        fallback_taxid_to_names.setdefault(cols[1].strip(), []).append(cols[0].strip())
+
+    if fallback_taxid_to_names:
+        so, se = run_taxonkit(['reformat', '-I','1', '-P'], list(fallback_taxid_to_names.keys()))
+        for str in so.decode().splitlines():
+            taxrow = str.split("\t")
+            fb_taxid = taxrow[0].strip()
+            lineagestr = taxrow[1].strip() if len(taxrow) > 1 else ''
+            taxcols = parse_lineage(lineagestr)
+            if not taxcols or fb_taxid not in fallback_taxid_to_names:
+                continue
+            for fallback_name in fallback_taxid_to_names[fb_taxid]:
+                for ncbi_id in fallback_name_to_taxids[fallback_name]:
+                    for acc in taxid_to_accs[ncbi_id]:
+                        row = rows[acc]
+                        for colnum, name in taxcols.items():
+                            row[colnum] = name
+
+for row in rows.values():
+    csvout.writerow(row)
