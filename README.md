@@ -135,6 +135,9 @@ the `lib/`, `logs/`, `old-pipeline/`, `plots/`, `scripts/` trees.
   converted to `;`; any remaining bare comma (e.g. `CRUB 1588,7`) then becomes
   `_`, so strain fields are never emitted quoted in the output CSV.
 - When the same species+strain has multiple assemblies, RefSeq (`GCF_`) is
-  preferred over GenBank (`GCA_`).
+  preferred over GenBank (`GCA_`); otherwise the first in the `datasets` JSON
+  order wins. To force a specific winner regardless of order, add a
+  `SUPPRESS_IN_FAVOR_OF` entry in `assembly_json_process.py` mapping the
+  accession to suppress to the accession to keep.
 - `pixi run make <target>` is the canonical entrypoint; avoid re-introducing
   `module load` / `conda activate` in new scripts.

@@ -70,6 +70,35 @@ def sanitize_name(name):
     return name
 #.strip('_')
 
+# Manual overrides for the (species, strain) dedup below: maps the accession to
+# SUPPRESS -> the accession to KEEP when both share the same species+strain key.
+# Needed when the same strain has multiple GenBank assemblies and the win-by-
+# JSON-order (or GCF_-over-GCA_) default picks the wrong one. Example: B.
+# salamandrivorans AMFP14/2 has two assemblies (ASM2155665v1 N50=27,733 vs the
+# much better ASM2155666v1 with N50=122,518; the latter must win regardless of
+# the order NCBI lists them). Entries are keyed by accession, so they can be
+# listed in any order and either may appear first in the JSON.
+SUPPRESS_IN_FAVOR_OF = {
+    # B. salamandrivorans AMFP14/2: GCA_021556655.1 (ASM2155665v1) -> GCA_021556665.1 (ASM2155666v1)
+    "GCA_021556655.1": "GCA_021556665.1",
+}
+
+
+def preferred_winner(prev_row, new_row):
+    """Resolve SUPPRESS_IN_FAVOR_OF between two candidate rows for the same key.
+
+    Returns the winning row when the map applies (either the new row replaces
+    the previously kept one, or the kept one stays), None when neither accession
+    is involved so the caller falls back to the default rule.
+    """
+    prev_acc, new_acc = prev_row[0], new_row[0]
+    if SUPPRESS_IN_FAVOR_OF.get(prev_acc) == new_acc:
+        return new_row
+    if SUPPRESS_IN_FAVOR_OF.get(new_acc) == prev_acc:
+        return prev_row
+    return None
+
+
 parser = argparse.ArgumentParser(description="NCBI Datasets Genomes Process.",
                                  epilog="Generate by running. ./datasets summary genome taxon fungi > ncbi_accessions.json")
 parser.add_argument('--infile', dest='infile', default="ncbi_accessions.json",
@@ -149,8 +178,14 @@ with open(args.infile, "r",encoding="utf-8") as jsonin, open(args.outfile,"w",ne
         # prefer GCF_ (RefSeq) over GCA_ when the same species+strain has multiple assemblies
         key = (species, strain)
         prev = rows.get(key)
-        if prev is None or (accession.startswith("GCF_") and not prev[0].startswith("GCF_")):
+        if prev is None:
             rows[key] = row
+        else:
+            winner = preferred_winner(prev, row)
+            if winner is not None:
+                rows[key] = winner
+            elif accession.startswith("GCF_") and not prev[0].startswith("GCF_"):
+                rows[key] = row
         if args.verbose:
             print(rows[key])
     for key in sorted(rows.keys()):
