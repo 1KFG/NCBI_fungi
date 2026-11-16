@@ -3,16 +3,33 @@ import json, csv,sys, re
 import argparse
 from subprocess import Popen, PIPE, STDOUT
 
-# todo -figure out how to get subphylum from taxonkit ...
+# Ranks written to the output CSV, in the order taxonkit is asked for them.
+#
+# These are requested from `taxonkit reformat2`, which takes full rank names,
+# rather than `taxonkit reformat`, whose canonical format offers only
+# kingdom/phylum/class/order/family/genus/species -- it has no placeholder for
+# subphylum or subclass at all.
+#
+# This replaces a single-letter {code: column} map that could not work: it
+# carried both 's': 'SUBPHYLUM' and 's': 'SPECIES', and since a dict keeps the
+# last value for a repeated key, the SUBPHYLUM entry was discarded when the
+# module was loaded. SUBCLASS had no entry at all. Both columns were therefore
+# emitted empty for every row, silently, for as long as the script has existed
+# (0 of 24,523 rows populated in lib/ncbi_accessions_taxonomy_20261023.csv,
+# against 100 % for PHYLUM and 99.1 % for CLASS). Parsing is now positional
+# against this list, so no code can be ambiguous in that way again.
+LINEAGE_RANKS = ['PHYLUM', 'SUBPHYLUM', 'CLASS', 'SUBCLASS',
+                 'ORDER', 'FAMILY', 'GENUS', 'SPECIES']
 
-rankToName = {# 'k': 'Kingdom', # don't need to save Kingdom
-              'p': 'PHYLUM',
-              's': 'SUBPHYLUM',
-              'c': 'CLASS',
-              'o': 'ORDER',
-              'f': 'FAMILY',
-              'g': 'GENUS',
-              's': 'SPECIES' }
+# e.g. "{phylum};{subphylum};{class};{subclass};{order};{family};{genus};{species}"
+TAXONKIT_FORMAT = ';'.join('{%s}' % rank.lower() for rank in LINEAGE_RANKS)
+
+# Subcommand + flags shared by both reformat2 call sites below.
+#   -I 1  : taxids are in field 1 of the input
+#   -f    : explicit rank format (above); missing ranks come back empty, which
+#           is what we want -- an absent subclass must not be filled in from a
+#           neighbouring rank.
+REFORMAT_ARGS = ['reformat2', '-I', '1', '-f', TAXONKIT_FORMAT]
 
 parser = argparse.ArgumentParser(description="Add Taxonomy Columns to genome accession set.",
                                  epilog="requires bin/taxonkit to be installed - see scripts/get_taxonkit.sh")
@@ -110,16 +127,30 @@ def run_taxonkit(subargs, input_lines):
     return so, se
 
 def parse_lineage(lineagestr):
+    """Map a reformat2 lineage string onto output column numbers.
+
+    Parsing is positional: reformat2 was asked for exactly LINEAGE_RANKS in
+    order, so field i is rank i. Ranks the taxid does not define come back as
+    empty strings and are left out, so the caller still sees an empty dict for
+    a taxid with no lineage at all and can fall back as before.
+    """
     taxcols = {}
-    for l in lineagestr.split(';'):
-        if "__" not in l:
-            continue
-        (rank,name) = l.split("__",1)
-        if rank in rankToName:
-            taxcols[newoutcol2num[rankToName[rank]]] = sanitize_name(name)
+    if not lineagestr:
+        return taxcols
+    parts = lineagestr.split(';')
+    if len(parts) != len(LINEAGE_RANKS):
+        # Not the shape we asked for -- refuse to guess which rank is which,
+        # rather than silently writing names into the wrong columns.
+        print("WARNING: expected {} lineage fields, got {}: {!r}".format(
+            len(LINEAGE_RANKS), len(parts), lineagestr), file=sys.stderr)
+        return taxcols
+    for rank, name in zip(LINEAGE_RANKS, parts):
+        name = name.strip()
+        if name:
+            taxcols[newoutcol2num[rank]] = sanitize_name(name)
     return taxcols
 
-so, se = run_taxonkit(['reformat', '-I','1', '-P'], msg)
+so, se = run_taxonkit(REFORMAT_ARGS, msg)
 unresolved_taxids = []
 if len(so) == 0:
     print("error no result for {}, error is {}".format(msg,se))
@@ -161,7 +192,7 @@ if unresolved_taxids:
         fallback_taxid_to_names.setdefault(cols[1].strip(), []).append(cols[0].strip())
 
     if fallback_taxid_to_names:
-        so, se = run_taxonkit(['reformat', '-I','1', '-P'], list(fallback_taxid_to_names.keys()))
+        so, se = run_taxonkit(REFORMAT_ARGS, list(fallback_taxid_to_names.keys()))
         for str in so.decode().splitlines():
             taxrow = str.split("\t")
             fb_taxid = taxrow[0].strip()
